@@ -1,0 +1,6 @@
+pipeline:
+  docker_build:
+    image: plugins/docker
+    # repo: incizzle/monitor-template
+    secrets: [ docker_username, docker_password ]
+    tag: [ latest ]
