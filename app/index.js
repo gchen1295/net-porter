@@ -64,6 +64,7 @@ function sendErrorWebhook(embedData) {
 startmonitor()
 
 function startmonitor() {
+    console.log("Start")
     setTimeout(async function () {
         let rawProducts = await getProductsAPI()
         console.log(rawProducts)
