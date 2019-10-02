@@ -66,9 +66,7 @@ startmonitor()
 function startmonitor() {
     try
     {
-      console.log("Start")
       setTimeout(async function () {
-          console.log("Heres")
           let rawProducts = await getProductsAPI()
           console.log("Heres 2")
           for(let i in rawProducts)
@@ -151,6 +149,7 @@ async function getProductsAPI()
 {
   try
   {
+    console.log("Start request")
     let res = await request({
       url: 'https://api.net-a-porter.com/NAP/GB/en/1600/0/summaries?brandIds=1051,1212,1840,2606&whatsNew=Now',
       headers: {
@@ -159,13 +158,13 @@ async function getProductsAPI()
       resolveWithFullResponse: true,
       followAllRedirects: true
     })
-    
+    console.log("Finish")
     let products = JSON.parse(res.body).summaries
     
     return products  
   }
   catch(err)
-  {
+  {console.log("EROOR")
     console.log(err)
     if(err.statusCode)
     {
