@@ -66,9 +66,9 @@ startmonitor()
 function startmonitor() {
     setTimeout(async function () {
         let rawProducts = await getProductsAPI()
+        console.log(rawProducts)
         for(let i in rawProducts)
         {
-
           let found = await Products.findOne({productID: rawProducts[i].id, productName: rawProducts[i].name})
           let cleanedProduct = await cleanProduct(rawProducts[i])
           if(found)
