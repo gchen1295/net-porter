@@ -24,6 +24,8 @@ let brands = {
   '2606': 'off_white'
 }
 
+let proxies = process.env.PROXIES.split(' ')
+
 var webHookURL = process.env.WEBHOOK
 var errorHook = process.env.ERRORHOOK
 
@@ -67,12 +69,13 @@ function startmonitor() {
     try
     {
       setTimeout(async function () {
-          let rawProducts = await getProductsAPI()
-          console.log("Heres 2")
+          let proxy = proxies.shift()
+          proxies.push(proxy)
+          let rawProducts = await getProductsAPI(proxy)
           for(let i in rawProducts)
           {
             let found = await Products.findOne({productID: rawProducts[i].id, productName: rawProducts[i].name})
-            let cleanedProduct = await cleanProduct(rawProducts[i])
+            let cleanedProduct = await cleanProduct(rawProducts[i], proxy)
             if(found)
             {
               // Check for restocks
@@ -104,7 +107,7 @@ function startmonitor() {
             }
           }
           startmonitor()
-      }, 2000 )
+      }, 1000 )
     }
     catch(err)
     {
@@ -145,26 +148,27 @@ async function getProducts()
   }
 }
 
-async function getProductsAPI()
+async function getProductsAPI(proxy)
 {
   try
   {
-    console.log("Start request")
+    let proxyParts = proxy.split(':')
+    let agent = "http://" + proxyParts[2] + ':' + proxyParts[3] + '@' + proxyParts[0] + ':' + proxyParts[1]
     let res = await request({
       url: 'https://api.net-a-porter.com/NAP/GB/en/1600/0/summaries?brandIds=1051,1212,1840,2606&whatsNew=Now',
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.90 Safari/537.36'
       },
+      proxy: agent,
       resolveWithFullResponse: true,
       followAllRedirects: true
     })
-    console.log("Finish")
     let products = JSON.parse(res.body).summaries
     
     return products  
   }
   catch(err)
-  {console.log("EROOR")
+  {
     console.log(err)
     if(err.statusCode)
     {
@@ -179,7 +183,7 @@ async function getProductsAPI()
   }
 }
 
-async function cleanProduct(product)
+async function cleanProduct(product, proxy)
 {
   try
   {
@@ -192,7 +196,7 @@ async function cleanProduct(product)
     let pLink = `https://net-a-porter.com/gb/en/product/${productID}/${brandName}/${pl}`
     pLink = pLink.replace(/\+/g, "-")
     pLink = pLink.normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-    let rawSizeData = await getSizes(pLink)
+    let rawSizeData = await getSizes(pLink, proxy)
     let cleanSizes = []
     for(let j in rawSizeData)
     {
@@ -229,15 +233,18 @@ async function cleanProduct(product)
   }
 }
 
-async function getSizes(productURL)
+async function getSizes(productURL, proxy)
 {
   try
   {
+    let proxyParts = proxy.split(':')
+    let agent = "http://" + proxyParts[2] + ':' + proxyParts[3] + '@' + proxyParts[0] + ':' + proxyParts[1]
     let res = await request({
       url: productURL,
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.90 Safari/537.36'
       },
+      proxy: agent,
       resolveWithFullResponse: true,
       followAllRedirects: true
     })
