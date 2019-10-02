@@ -168,7 +168,7 @@ async function getProductsAPI(proxy)
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.90 Safari/537.36'
       },
-      //proxy: agent,
+      proxy: agent,
       resolveWithFullResponse: true,
       followAllRedirects: true
     })
@@ -254,7 +254,7 @@ async function getSizes(productURL, proxy)
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.90 Safari/537.36'
       },
-      //proxy: agent,
+      proxy: agent,
       resolveWithFullResponse: true,
       followAllRedirects: true
     })
