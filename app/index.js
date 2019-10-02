@@ -1,3 +1,4 @@
+require('dotenv').config()
 const request = require('request-promise')
 const mongoose = require('mongoose')
 const cheerio = require('cheerio')
@@ -23,7 +24,8 @@ let brands = {
   '2606': 'off_white'
 }
 
-var webHookURL = 'https://discordapp.com/api/webhooks/628764194174402560/-gjl85A35iTAF9U3CB9IWAAMEE8qhRC6Wl6yKjmH5iltLZYvkIAHvr7ycsASlY2Iuui0'
+var webHookURL = process.env.WEBHOOK
+var errorHook = process.env.ERRORHOOK
 
 function sendDicordWebhook(embedData) {
   try{
@@ -42,11 +44,24 @@ function sendDicordWebhook(embedData) {
   }
 }
 
-startmonitor()
+function sendErrorWebhook(embedData) {
+  try{
+      queue.push(() => {
+        request.post(errorHook,{
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(embedData)
+        });
+      });
+  }
+  catch(err)
+  {
+    console.log(err)
+  }
+}
 
-// getSizes('https://net-a-porter.com/gb/en/product/1167297/adidas_originals/--pharrell-williams---human-made-solar-hu-appliquéd-mesh-and-neoprene-sneakers').then(a =>{
-//   console.log(a)
-// })
+startmonitor()
 
 function startmonitor() {
     setTimeout(async function () {
@@ -109,6 +124,16 @@ async function getProducts()
   catch(err)
   {
     console.log(err)
+    if(err.statusCode)
+    {
+      let e = buildError(`GetProducts: ${err.statusCode}`)
+      await sendErrorWebhook(e)
+    }
+    else
+    {
+      let e = buildError(`GetProducts: ${err}`)
+      await sendErrorWebhook(e)
+    }
   }
 }
 
@@ -132,6 +157,16 @@ async function getProductsAPI()
   catch(err)
   {
     console.log(err)
+    if(err.statusCode)
+    {
+      let e = buildError(`GetProducts: ${err.statusCode}`)
+      await sendErrorWebhook(e)
+    }
+    else
+    {
+      let e = buildError(`GetProducts: ${err}`)
+      await sendErrorWebhook(e)
+    }
   }
 }
 
@@ -172,7 +207,16 @@ async function cleanProduct(product)
   catch(err)
   {
     console.log(err)
-    console.log(err.statusCode)
+    if(err.statusCode)
+    {
+      let e = buildError(`CleanProducts: ${err.statusCode}`)
+      await sendErrorWebhook(e)
+    }
+    else
+    {
+      let e = buildError(`CleanProducts: ${err}`)
+      await sendErrorWebhook(e)
+    }
   }
 }
 
@@ -196,10 +240,17 @@ async function getSizes(productURL)
   }
   catch(err)
   {
-    console.log(err.statusCode)
-    console.log(productURL)
-    // await new Promise(resolve => setTimeout(resolve, 1000));
-    // await getSizes(productURL)
+    console.log(err)
+    if(err.statusCode)
+    {
+      let e = buildError(`GetSizes: ${err.statusCode}\n${productURL}`)
+      await sendErrorWebhook(e)
+    }
+    else
+    {
+      let e = buildError(`GetSizes: ${err}\n${productURL}`)
+      await sendErrorWebhook(e)
+    }
   }
 }
 
@@ -287,6 +338,36 @@ function buildRestocked(product)
     }
     emb.embeds[0].fields.push({name: 'Sizes', value: sizeFields.join('\n'), inline: true})
     emb.embeds[0].fields.push({name: 'Stock Level', value: stockFields.join('\n'), inline: true})
+    return emb
+  }
+  catch(err)
+  {
+    console.log(err)
+  }
+}
+
+function buildError(error)
+{
+  try
+  {
+    let emb = {
+      username: "Error!",
+      avatar_url: "https://2static1.fjcdn.com/comments/I+figs+dis+me+mayk+u+nise+to+muma+u+_b8b3c240e1ea918170c0a00e5249f795.jpg",
+      embeds: [
+        {
+          title: `${product.productName} Restocked!`,
+          url: product.productURL,
+          color: 0xFFFF33,
+          description: error,
+          footer: {
+            icon_url:
+              "https://2static1.fjcdn.com/comments/I+figs+dis+me+mayk+u+nise+to+muma+u+_b8b3c240e1ea918170c0a00e5249f795.jpg",
+            text: "~Woof~#1001"
+          },
+          timestamp: new Date()
+        }
+      ]
+    };
     return emb
   }
   catch(err)
