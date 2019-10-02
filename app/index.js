@@ -66,6 +66,7 @@ startmonitor()
 function startmonitor() {
     console.log("Start")
     setTimeout(async function () {
+        console.log("Heres")
         let rawProducts = await getProductsAPI()
         console.log(rawProducts)
         for(let i in rawProducts)
