@@ -11,7 +11,7 @@ let queue = housecall({
   cooldown: 700
 });
 
-mongoose.connect(`mongodb://localhost:27017/net-a-porter`, {
+mongoose.connect(`mongodb://127.0.0.1:27017/net-a-porter`, {
     useNewUrlParser: true,
     useCreateIndex: true
 })
