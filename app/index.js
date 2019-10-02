@@ -64,48 +64,55 @@ function sendErrorWebhook(embedData) {
 startmonitor()
 
 function startmonitor() {
-    console.log("Start")
-    setTimeout(async function () {
-        console.log("Heres")
-        let rawProducts = await getProductsAPI()
-        console.log(rawProducts)
-        console.log("Heres 2")
-        for(let i in rawProducts)
-        {
-          let found = await Products.findOne({productID: rawProducts[i].id, productName: rawProducts[i].name})
-          let cleanedProduct = await cleanProduct(rawProducts[i])
-          if(found)
+    try
+    {
+      console.log("Start")
+      setTimeout(async function () {
+          console.log("Heres")
+          let rawProducts = await getProductsAPI()
+          console.log("Heres 2")
+          for(let i in rawProducts)
           {
-            // Check for restocks
-            let restocked = false
-            let foundSizes = JSON.parse(JSON.stringify(found.productSizes))
-            for(let i in foundSizes)
+            let found = await Products.findOne({productID: rawProducts[i].id, productName: rawProducts[i].name})
+            let cleanedProduct = await cleanProduct(rawProducts[i])
+            if(found)
             {
-              if(foundSizes[i].stockLevel !== cleanedProduct.productSizes[i].stockLevel)
+              // Check for restocks
+              let restocked = false
+              let foundSizes = JSON.parse(JSON.stringify(found.productSizes))
+              for(let i in foundSizes)
               {
-                restocked = true
-                break;
+                if(foundSizes[i].stockLevel !== cleanedProduct.productSizes[i].stockLevel)
+                {
+                  restocked = true
+                  break;
+                }
+              }
+              if(restocked)
+              {
+                found.productSizes = cleanedProduct.productSizes
+                await found.save()
+                let emb = buildRestocked(cleanedProduct)
+                await sendDicordWebhook(emb)
               }
             }
-            if(restocked)
+            else
             {
-              found.productSizes = cleanedProduct.productSizes
-              await found.save()
-              let emb = buildRestocked(cleanedProduct)
+              // Save product and push notif
+              let newProduct = new Products(cleanedProduct)
+              await newProduct.save()
+              let emb = buildNewProduct(cleanedProduct) 
               await sendDicordWebhook(emb)
             }
           }
-          else
-          {
-            // Save product and push notif
-            let newProduct = new Products(cleanedProduct)
-            await newProduct.save()
-            let emb = buildNewProduct(cleanedProduct) 
-            await sendDicordWebhook(emb)
-          }
-        }
-        startmonitor()
-    }, 2000 )
+          startmonitor()
+      }, 2000 )
+    }
+    catch(err)
+    {
+      console.log(err)
+      startmonitor()
+    }
 }
 
 async function getProducts()
