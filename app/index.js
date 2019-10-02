@@ -71,6 +71,7 @@ function startmonitor() {
         try{
           let proxy = proxies.shift()
           proxies.push(proxy)
+          console.log(proxy)
           let rawProducts = await getProductsAPI(proxy)
           for(let i in rawProducts)
           {
@@ -162,7 +163,7 @@ async function getProductsAPI(proxy)
   try
   {
     let proxyParts = proxy.split(':')
-    let agent = "http://" + proxyParts[2] + ':' + proxyParts[3] + '@' + proxyParts[0] + ':' + proxyParts[1]
+    let agent = "http://" + proxyParts[0] + ':' + proxyParts[1]
     let res = await request({
       url: 'https://api.net-a-porter.com/NAP/GB/en/1600/0/summaries?brandIds=1051,1212,1840,2606&whatsNew=Now',
       headers: {
@@ -248,7 +249,7 @@ async function getSizes(productURL, proxy)
   try
   {
     let proxyParts = proxy.split(':')
-    let agent = "http://" + proxyParts[2] + ':' + proxyParts[3] + '@' + proxyParts[0] + ':' + proxyParts[1]
+    let agent = "http://" + proxyParts[0] + ':' + proxyParts[1]
     let res = await request({
       url: productURL,
       headers: {
