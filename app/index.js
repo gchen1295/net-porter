@@ -66,9 +66,9 @@ function sendErrorWebhook(embedData) {
 startmonitor()
 
 function startmonitor() {
-    try
-    {
+
       setTimeout(async function () {
+        try{
           let proxy = proxies.shift()
           proxies.push(proxy)
           let rawProducts = await getProductsAPI(proxy)
@@ -107,13 +107,22 @@ function startmonitor() {
             }
           }
           startmonitor()
+        }
+        catch(err)
+        {
+          if(err.statusCode)
+          {
+            let e = buildError(`Main process: ${err.statusCode}`)
+            await sendErrorWebhook(e)
+          }
+          else
+          {
+            let e = buildError(`Main process: ${err}`)
+            console.log(e)
+            await sendErrorWebhook(e)
+          }
+        }
       }, 1000 )
-    }
-    catch(err)
-    {
-      console.log(err)
-      startmonitor()
-    }
 }
 
 async function getProducts()
@@ -159,7 +168,7 @@ async function getProductsAPI(proxy)
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.90 Safari/537.36'
       },
-      proxy: agent,
+      //proxy: agent,
       resolveWithFullResponse: true,
       followAllRedirects: true
     })
@@ -228,6 +237,7 @@ async function cleanProduct(product, proxy)
     else
     {
       let e = buildError(`CleanProducts: ${err}`)
+      console.log(e)
       await sendErrorWebhook(e)
     }
   }
@@ -244,7 +254,7 @@ async function getSizes(productURL, proxy)
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.90 Safari/537.36'
       },
-      proxy: agent,
+      //proxy: agent,
       resolveWithFullResponse: true,
       followAllRedirects: true
     })
@@ -371,8 +381,7 @@ function buildError(error)
       avatar_url: "https://2static1.fjcdn.com/comments/I+figs+dis+me+mayk+u+nise+to+muma+u+_b8b3c240e1ea918170c0a00e5249f795.jpg",
       embeds: [
         {
-          title: `${product.productName} Restocked!`,
-          url: product.productURL,
+          title: `FIX YOUR SHIT`,
           color: 0xFFFF33,
           description: error,
           footer: {
