@@ -69,6 +69,7 @@ function startmonitor() {
         console.log("Heres")
         let rawProducts = await getProductsAPI()
         console.log(rawProducts)
+        console.log("Heres 2")
         for(let i in rawProducts)
         {
           let found = await Products.findOne({productID: rawProducts[i].id, productName: rawProducts[i].name})
