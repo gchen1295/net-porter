@@ -129,6 +129,7 @@ function startmonitor() {
             console.log(e)
             await sendErrorWebhook(e)
           }
+          startmonitor()
         }
       }, 1500 )
 }
