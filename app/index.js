@@ -75,6 +75,13 @@ function startmonitor() {
           let rawProducts = await getProductsAPI(proxy)
           for(let i in rawProducts)
           {
+
+            if(i % 5 === 0)
+            {
+              proxy = proxies.shift()
+              proxies.push(proxy)
+              console.log(proxy)
+            }
             let found = await Products.findOne({productID: rawProducts[i].id, productName: rawProducts[i].name})
             let cleanedProduct = await cleanProduct(rawProducts[i], proxy)
             if(found)
@@ -84,7 +91,7 @@ function startmonitor() {
               let foundSizes = JSON.parse(JSON.stringify(found.productSizes))
               for(let i in foundSizes)
               {
-                if(foundSizes[i].stockLevel !== cleanedProduct.productSizes[i].stockLevel)
+                if(foundSizes[i].stockLevel === 'Out_of_Stock' && cleanedProduct.productSizes[i].stockLevel !== 'Out_of_Stock')
                 {
                   restocked = true
                   break;
@@ -123,7 +130,7 @@ function startmonitor() {
             await sendErrorWebhook(e)
           }
         }
-      }, 1000 )
+      }, 1500 )
 }
 
 async function getProducts()
