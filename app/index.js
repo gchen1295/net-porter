@@ -1,411 +1,571 @@
 require('dotenv').config()
-const request = require('request-promise')
+const discord = require('discord.js')
+let bot = new discord.Client()
 const mongoose = require('mongoose')
-const cheerio = require('cheerio')
+let Servers = require('./models/servers.js')
+let Config = require('./models/config.js')
+const child_process = require('child_process')
 const housecall = require("housecall");
-const Products = require('./models/product')
-let date = new Date()
-let dateFormat = `${date.getFullYear()}-${date.getDay()}-${date.getMonth() + 1} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`
 let queue = housecall({
   concurrency: 1,
   cooldown: 700
 });
 
-mongoose.connect(`mongodb://127.0.0.1:27017/net-a-porter`, {
+// GLOBALS
+let owner
+let prefix = 'nap!'
+// let monitorStarted = false
+// let monitor
+
+bot.login(process.env.BOT_TOKEN).then(async ()=>{
+  const mongoserver = process.env.MONGO_SERVER
+  const db = process.env.MONGO_DB
+  mongoose.connect(`mongodb://${mongoserver}/${db}`, {
     useNewUrlParser: true,
     useCreateIndex: true
+  })
+  let appl = await bot.fetchApplication()
+  owner = appl.owner
+  mongoose.Promise = global.Promise;
 })
-mongoose.Promise = global.Promise;
 
-let brands = {
-  '1840': 'adidas_originals',
-  '1051': 'nike',
-  '1212': 'new_balance',
-  '2606': 'off_white'
-}
-
-let proxies = process.env.PROXIES.split(' ')
-
-var webHookURL = process.env.WEBHOOK
-var errorHook = process.env.ERRORHOOK
-
-function sendDicordWebhook(embedData) {
-  try{
-      queue.push(() => {
-        request.post(webHookURL,{
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(embedData)
-        });
-      });
-  }
-  catch(err)
+// Server setup functions
+bot.on('message', async message => {
+  if (message.author.bot) return
+  // Check and load server info
+  let args = message.content.split(' ')
+  let msgprefix = args[0].substring(0, prefix.length)
+  if(msgprefix !== prefix) return 
+  let cmd = args[0].substring(prefix.length, args[0].length)
+  let serverInfo = await Servers.findOne({serverID: message.guild.id})
+  if(message.author.id === owner.id)
   {
-    console.log(err)
-  }
-}
-
-function sendErrorWebhook(embedData) {
-  try{
-      queue.push(() => {
-        request.post(errorHook,{
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(embedData)
-        });
-      });
-  }
-  catch(err)
-  {
-    console.log(err)
-  }
-}
-
-startmonitor()
-
-function startmonitor() {
-
-      setTimeout(async function () {
-        try{
-          let proxy = proxies.shift()
-          proxies.push(proxy)
-          console.log(proxy)
-          let rawProducts = await getProductsAPI(proxy)
-          for(let i in rawProducts)
-          {
-
-            if(i % 5 === 0)
-            {
-              proxy = proxies.shift()
-              proxies.push(proxy)
-              console.log(proxy)
-            }
-            let found = await Products.findOne({productID: rawProducts[i].id, productName: rawProducts[i].name})
-            let cleanedProduct = await cleanProduct(rawProducts[i], proxy)
-            if(found)
-            {
-              // Check for restocks
-              let restocked = false
-              let foundSizes = JSON.parse(JSON.stringify(found.productSizes))
-              for(let i in foundSizes)
-              {
-                if(foundSizes[i].stockLevel === 'Out_of_Stock' && cleanedProduct.productSizes[i].stockLevel !== 'Out_of_Stock')
-                {
-                  restocked = true
-                  break;
-                }
-              }
-              if(restocked)
-              {
-                found.productSizes = cleanedProduct.productSizes
-                await found.save()
-                let emb = buildRestocked(cleanedProduct)
-                await sendDicordWebhook(emb)
-              }
-            }
-            else
-            {
-              // Save product and push notif
-              let newProduct = new Products(cleanedProduct)
-              await newProduct.save()
-              let emb = buildNewProduct(cleanedProduct) 
-              await sendDicordWebhook(emb)
-            }
-          }
-          startmonitor()
-        }
-        catch(err)
+    if(cmd === 'auth')
+    {
+      //let serverInfo = await Servers.findOne({id: message.guild.id})
+      if(args[1] === undefined) return
+      let server = await Servers.findOne({serverID: args[1]})
+      if(server)
+      {
+        await message.channel.send({embed: {
+          title: "Server Authorized!",
+          description: `Server already authorized`
+        }})
+      }
+      else
+      {
+        let newServer = new Servers({serverID: args[1], authorizedUsers: [owner.id]})
+        await newServer.save()
+        message.channel.send({embed: {
+          title: "Server Authorized",
+          description: `Authorized ${args[1]}`
+        }})
+      }
+      return
+    }
+    if(cmd === 'unauth')
+    {
+      if(args[1] === undefined) return
+      let server = await Servers.findOne({serverID: args[1]})
+      if(server)
+      {
+        let config = await Config.findOne()
+        for(let i = 0; i < config.unfiltered.length; i++)
         {
-          if(err.statusCode)
+          if(config.unfiltered[i].webhook === serverInfo.unfilterChannelWH)
           {
-            let e = buildError(`Main process: ${err.statusCode}`)
-            await sendErrorWebhook(e)
+            config.unfiltered.splice(i, 1)
+            break
+          }
+        }
+        for(let j = 0; j < config.filtered.length; j++)
+        {
+          if(config.filtered[j].webhook === serverInfo.filteredChannelWH)
+          {
+            config.filtered.splice(j ,1)
+            break
+          }
+        }
+        await config.save()
+        await server.remove()
+        await message.channel.send({embed: {
+          title: "Server Removed!",
+          description: `Server has been removed`
+        }})
+      }
+      else
+      {
+        message.channel.send({embed: {
+          title: "Server Not Found",
+          description: `Cannot find mentioned server!`
+        }})
+      }
+      return
+    }
+    if(cmd === 'setlogo' && message.channel.type !== 'dm')
+    {
+      //let serverInfo = await Servers.findOne({id: message.guild.id})
+      if(serverInfo)
+      {
+        let config = await Config.findOne()
+        
+        serverInfo.logo = args[1]
+        for(let i = 0; i < config.unfiltered.length; i++)
+        {
+          if(config.unfiltered[i].webhook === serverInfo.unfilterChannelWH)
+          {
+            config.unfiltered[i].logo = args[1]
+            break
+          }
+        }
+        for(let j = 0; j < config.filtered.length; j++)
+        {
+          if(config.filtered[j].webhook === serverInfo.filteredChannelWH)
+          {
+            config.filtered[j].logo = args[1]
+            break
+          }
+        }
+        await config.save()
+        await serverInfo.save()
+        message.channel.send({embed: {
+          author: {
+            name: 'Logo Set!',
+            icon_url: serverInfo.logo,
+          },
+        }})
+      }
+      else
+      {
+        await message.channel.send({embed: {
+          title: "Server Not Authorized!",
+          description: `Please authorize ${message.guild.id}`
+        }})
+      }
+      return
+    }
+    if(cmd === 'setcolor' && message.channel.type !== 'dm')
+    {
+      //let serverInfo = await Servers.findOne({id: message.guild.id})
+      if(serverInfo)
+      {
+        serverInfo.color = '0x' + args[1].substring(1,args[1].length)
+        let config = await Config.findOne()
+
+        for(let i = 0; i < config.unfiltered.length; i++)
+        {
+          if(config.unfiltered[i].webhook === serverInfo.unfilterChannelWH)
+          {
+            console.log(config.unfiltered[i].webhook)
+            config.unfiltered[i].color = serverInfo.color
+            break
+          }
+        }
+        for(let j = 0; j < config.filtered.length; j++)
+        {
+          if(config.filtered[j].webhook === serverInfo.filteredChannelWH)
+          {
+            config.filtered[j].color = serverInfo.color
+            break
+          }
+        }
+        await config.save()
+        console.log(config)
+        await message.channel.send({embed: {
+          title: "Embed color set!",
+          color: parseInt(serverInfo.color),
+          description: `If embed is invalid please input a valid hex color in format #FFFFFF`
+        }})
+        await serverInfo.save()
+      }
+      else
+      {
+        await message.channel.send({embed: {
+          title: "Server Not Authorized!",
+          description: `Please authorize ${message.guild.id}`
+        }})
+      }
+      return
+    }
+    if(cmd === 'setup' && message.channel.type !== 'dm')
+    {
+      //let serverInfo = await Servers.findOne({id: message.guild.id})
+      if(serverInfo)
+      {
+        if(serverInfo.setupDone) return
+        // Set name of footer and guild
+        serverInfo.serverName = message.guild.name
+        let filterch
+        let unfilterch
+        let uwh
+        let fwh
+        if(message.guild.channels.some(channel => channel.name === 'nap-unfiltered'))
+        {
+          unfilterch = message.guild.channels.find(channel => channel.name === 'nap-unfiltered')
+          uwh = await unfilterch.fetchWebhooks()
+          if(uwh.first() === undefined)
+          {
+            uwh = await unfilterch.createWebhook('NAP Unfiltered')
+            serverInfo.unfilterChannelWH = `https://discordapp.com/api/webhooks/${uwh.id}/${uwh.token}`
           }
           else
           {
-            let e = buildError(`Main process: ${err}`)
-            console.log(e)
-            await sendErrorWebhook(e)
+            serverInfo.unfilterChannelWH = `https://discordapp.com/api/webhooks/${uwh.first().id}/${uwh.first().token}`
           }
-          startmonitor()
+          await message.channel.send(`Setup <#${unfilterch.id}>`)
         }
-      }, 1500 )
-}
+        else
+        {
+          unfilterch = await message.guild.createChannel('nap-unfiltered',{type: 'text'})
+          uwh = await unfilterch.createWebhook('NAP Unfiltered')
+          await message.channel.send(`Created <#${unfilterch.id}>`)
+        }
+        // Create filtered channel
+        if(message.guild.channels.some(channel => channel.name === 'nap-filtered'))
+        {
+          filterch = message.guild.channels.find(channel => channel.name === 'nap-filtered')
+          fwh = await filterch.fetchWebhooks()
+          if(fwh.first() === undefined)
+          {
+            fwh = await filterch.createWebhook('NAP Filtered')
+            serverInfo.filteredChannelWH = `https://discordapp.com/api/webhooks/${fwh.id}/${fwh.token}`
+          }
+          else
+          {
+            serverInfo.filteredChannelWH = `https://discordapp.com/api/webhooks/${fwh.first().id}/${fwh.first().token}`
+          }
+          await message.channel.send(`Setup <#${filterch.id}>`)
+        }
+        else
+        {
+          filterch = await message.guild.createChannel('nap-filtered',{type: 'text'})
+          fwh = await filterch.createWebhook('NAP Filtered')
+          await message.channel.send(`Created <#${filterch.id}>`)
+        }
+        
+        serverInfo.unfilterChannel = unfilterch.id
+        serverInfo.filteredChannel = filterch.id
+        let config = await Config.findOne()
+        if(config)
+        {
+          config.filtered.push({color: 16753920, logo: 'https://cdn.discordapp.com/icons/613371089158012938/1fd21f22b481124632a7149a4434a851.png?size=128', webhook: serverInfo.filteredChannelWH})
+          config.unfiltered.push({color: 16753920, logo: 'https://cdn.discordapp.com/icons/613371089158012938/1fd21f22b481124632a7149a4434a851.png?size=128', webhook: serverInfo.unfilterChannelWH})
+          await config.save()
+        }
+        else
+        {
+          let newConfig = new Config({
+            proxies: [],
+            keywords: [],
+            filtered: [{color: 16753920, logo: 'https://cdn.discordapp.com/icons/613371089158012938/1fd21f22b481124632a7149a4434a851.png?size=128', webhook: serverInfo.filteredChannelWH}],
+            unfiltered: [{color: 16753920, logo: 'https://cdn.discordapp.com/icons/613371089158012938/1fd21f22b481124632a7149a4434a851.png?size=128', webhook: serverInfo.unfilterChannelWH}]
+          })
+          await newConfig.save()
+        }
+        serverInfo.setupDone = true
+        await serverInfo.save()
+      }
+      else
+      {
+        await message.channel.send({embed: {
+          title: "Server Not Authorized!",
+          description: `Please authorize ${message.guild.id}`
+        }})
+      }
+      return
+    }
+    if(cmd === 'authuser' && message.channel.type !== 'dm')
+    {
+      //let serverInfo = await Servers.findOne({id: message.guild.id})
+      if(serverInfo)
+      {
+        let user = await message.guild.members.get(args[1])
+        if(user)
+        {
+          serverInfo.authorizedUsers.push(args[1])
+          await serverInfo.save()
+          await message.channel.send({embed: {
+            title: "User Authorized!",
+            description: `${user.tag} authorized!`
+          }})
+        }
+        else
+        {
+          await message.channel.send({embed: {
+            title: "User Not Found!",
+            description: `Could not find user ${args[1]}`
+          }})
+        } 
+      }
+      else
+      {
+        await message.channel.send({embed: {
+          title: "Server Not Authorized!",
+          description: `Please authorize ${message.guild.id}`
+        }})
+      }
+      return
+    }
+    if(cmd === 'unauthuser' && message.channel.type !== 'dm')
+    {
+      //let serverInfo = await Servers.findOne({id: message.guild.id})
+      if(serverInfo)
+      {
+        let i = serverInfo.authorizedUsers.findIndex(args[1])
+        if(i > -1)
+        {
+          let user = await message.guild.members.get(args[1])
+          serverInfo.authorizedUsers.splice(i, 1)
+          await serverInfo.save()
+          await message.channel.send({embed: {
+            title: "User Removed!",
+            description: `${user.tag} removed!`
+          }})
+        }
+        else
+        {
+          await message.channel.send({embed: {
+            title: "User Not Found!",
+            description: `Could not find user ${args[1]}`
+          }})
+        } 
+      }
+      else
+      {
+        await message.channel.send({embed: {
+          title: "Server Not Authorized!",
+          description: `Please authorize ${message.guild.id}`
+        }})
+      }
+      return
+    }
+    if(cmd === 'addproxy')
+    {
+      let config = await Config.findOne()
+      if(config)
+      {
+        try
+        {
+          let msg = await message.channel.send("Enter proxies to add:")
+          let proxies = await msg.channel.awaitMessages(m => m.author.id === message.author.id, { maxMatches: 1, time: 60000, errors: ['time'] })
+          proxies = proxies.first().content.trim().split('\n')
+          let pmsg = proxies.join('\n')
+          message.channel.send(`\`\`\`${pmsg}\`\`\``)
+          for(let i in proxies)
+          {
+            config.proxies.push(proxies[i])
+          }
+          console.log(config.proxies)
+          await config.save()
+          message.channel.send('Proxies Added!')
+        }
+        catch(err)
+        {
+          console.log(err)
+          message.author.send({embed: {
+            title: "Timed out!",
+            color: 0xff0000,
+            description: "Timed out!"
+          }})
+          return
+        }
+      }
+      else
+      {
+        try
+        {
+          let msg = await message.channel.send("Enter proxies to add:")
+          let proxies = await msg.channel.awaitMessages(m => m.author.id === message.author.id, { maxMatches: 1, time: 60000, errors: ['time'] })
+          proxies = proxies.first().content.trim().split('\n')
+          let pmsg = proxies.join('\n')
+          message.channel.send(`\`\`\`${pmsg}\`\`\``)
+          
+          let newConfig = new Config({
+            proxies: [],
+            keywords: [],
+            filtered: [],
+            unfiltered: []
+          })
+          
+          for(let i in proxies)
+          {
+            newConfig.proxies.push(proxies[i])
+          }
+          await newConfig.save()
+          message.channel.send({embed: {
+            title: "New config created!"
+          }})
+          message.channel.send('Proxies Added!')
+        }
+        catch(err)
+        {
+          console.log(err)
+          message.author.send({embed: {
+            title: "Timed out!",
+            color: 0xff0000,
+            description: "Timed out!"
+          }})
+          return
+        }
+        
+      }
+      return
+    }
+    if(cmd === 'clearproxy')
+    {
+      let config = await Config.findOne()
+      if(config)
+      {
+        config.proxies = []
+        await config.save()
+        message.channel.send('Proxies cleared!')
+      }
+      else
+      {
+        await message.channel.send({embed: {
+          title: "No config found!",
+          description: `Please setup monitor!`
+        }})
+      }
+      return
+    }
+    if(cmd === 'addkws')
+    {
+      let config = await Config.findOne()
+      if(args[1] === undefined) return
+      if(config)
+      {
+        let isAdded = false
+        for(let i = 0; i < config.keywords.length; i++)
+        {
+          if(config.keywords[i] === args[1])
+          {
+            isAdded = true
+          }
+        }
+        if(!isAdded)
+        {
+          config.keywords.push(args[1])
+          await config.save()
+          await message.channel.send(`\`\"${args[1]}\" added\``)
+        }
+        else
+        {
+          await message.channel.send(`\`\"${args[1]}\" already exists\``)
+        }
+        
+      }
+      else
+      {
+        await message.channel.send({embed: {
+          title: "Server Not Authorized!",
+          description: `Please authorize ${args[0]}`
+        }})
+      }
+      return
+    }
+    if(cmd === 'removekws')
+    {
+      let config = await Config.findOne()
+      if(args[1] === undefined) return
+      if(config)
+      {
+        for(let i = 0; i < config.keywords.length; i++)
+        {
+          if(config.keywords[i] === args[1])
+          {
+            config.keywords.splice(i, 1)
+            await config.save()
+            await message.channel.send(`\`\"${args[1]}\" removed\``)
+          }
+        }
+      }
+      else
+      {
+        await message.channel.send({embed: {
+          title: "No configuration found!",
+          description: `Please configure by setting up a server!`
+        }})
+      }
+      return
+    }
+    if(cmd === 'listkws')
+    {
+      let config = await Config.findOne()
+      if(config)
+      {
+        if(config.keywords.length > 0)
+        {
+          await message.channel.send(`\Keywords:\n\`${config.keywords.join('\n')}\``)
+        }
+        else
+        {
+          await message.channel.send({embed: {
+            title: "No Filters Set!",
+            description: `Please add keywords to list!`
+          }})
+        }
+        
+      }
+      else
+      {
+        await message.channel.send({embed: {
+          title: "No configuration found!",
+          description: `Please configure by setting up a server!`
+        }})
+      }
+      return
+    }
 
-async function getProducts()
-{
-  try
-  {
-    let res = await request({
-      url: 'https://www.net-a-porter.com/us/en/d/Shop/Shoes/All?view=partial&cm_sp=topnav-_-shoes-_-allshoes&pn=1&npp=60&image_view=product&dScroll=0&sortorder=new-in',
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.90 Safari/537.36'
-      },
-      resolveWithFullResponse: true,
-      followAllRedirects: true
-    })
+
     
-    let $ = cheerio.load(res.body)
-
+    // if(cmd === 'start' && message.channel.type !== 'dm')
+    // {
+    //   if(serverInfo.unfilterChannel && serverInfo.filteredChannel && serverInfo.logo)
+    //   {
+    //     if(!monitorStarted)
+    //     {
+    //       monitor = child_process.fork("./netaporter")
+    //       monitor.send({type: 'start', serverID: message.guild.id})
+    //       await message.channel.send({embed: {
+    //         title: "Monitor started!"
+    //       }})
+    //       monitorStarted = true
+    //       monitor.on('message', async data =>{
+    //         if(data.source === 'Unfiltered')
+    //         {
+    //           //send to unfiltered channel
+    //           let chnl = bot.channels.get(serverInfo.unfilterChannel)
+    //           queue.push(()=>{chnl.send({embed: data.data})})
+    //         }
+    //         if(data.source === 'Filtered')
+    //         {
+    //           let chnl = bot.channels.get(serverInfo.filterChannel) 
+    //           queue.push(()=>{chnl.send({embed: data.data})})
+    //         }
+    //       })
+    //     }
+    //   }
+    //   else
+    //   {
+    //     await message.channel.send({embed: {
+    //       title: "Server Not Setup!",
+    //       description: `Please contact ${owner.tag}`
+    //     }})
+    //   }
+    //   return
+    // }
+    // if(cmd === 'stop' && message.channel.type !== 'dm')
+    // {
+    //   if(monitorStarted)
+    //   {
+    //     monitor.kill()
+    //     monitorStarted = false
+    //     await message.channel.send({embed: {
+    //       title: "Monitor stopped!"
+    //     }})
+    //   }
+    //   return
+    // }
   }
-  catch(err)
-  {
-    console.log(err)
-    if(err.statusCode)
-    {
-      let e = buildError(`GetProducts: ${err.statusCode}`)
-      await sendErrorWebhook(e)
-    }
-    else
-    {
-      let e = buildError(`GetProducts: ${err}`)
-      await sendErrorWebhook(e)
-    }
-  }
-}
-
-async function getProductsAPI(proxy)
-{
-  try
-  {
-    let proxyParts = proxy.split(':')
-    let agent = "http://" + proxyParts[0] + ':' + proxyParts[1]
-    let res = await request({
-      url: 'https://api.net-a-porter.com/NAP/GB/en/1600/0/summaries?brandIds=1051,1212,1840,2606&whatsNew=Now',
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.90 Safari/537.36'
-      },
-      proxy: agent,
-      resolveWithFullResponse: true,
-      followAllRedirects: true
-    })
-    let products = JSON.parse(res.body).summaries
-    
-    return products  
-  }
-  catch(err)
-  {
-    console.log(err)
-    if(err.statusCode)
-    {
-      let e = buildError(`GetProducts: ${err.statusCode}`)
-      await sendErrorWebhook(e)
-    }
-    else
-    {
-      let e = buildError(`GetProducts: ${err}`)
-      await sendErrorWebhook(e)
-    }
-  }
-}
-
-async function cleanProduct(product, proxy)
-{
-  try
-  {
-    let productID = product.id
-    let price = product.price.amount / product.price.divisor
-    let image = `https://cache.net-a-porter.com/images/products/${productID}/${productID}_in_pp.jpg`
-    let brandName = brands[product.brandId]
-    let pl = product.name.toLowerCase().split(' ')
-    pl = pl.join('-')
-    let pLink = `https://net-a-porter.com/gb/en/product/${productID}/${brandName}/${pl}`
-    pLink = pLink.replace(/\+/g, "-")
-    pLink = pLink.normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-    let rawSizeData = await getSizes(pLink, proxy)
-    let cleanSizes = []
-    for(let j in rawSizeData)
-    {
-      let atcLink = `https://www.net-a-porter.com/gb/en/api/basket/addskus/${rawSizeData[j].id}.json`
-      cleanSizes.push({
-        atcLink,
-        stockLevel: rawSizeData[j].stockLevel,
-        sizeName: rawSizeData[j].displaySize
-      })
-    }
-
-    return {
-      productName: product.name,
-      productID,
-      productPrice: price,
-      productURL: pLink,
-      productImage: image,
-      productSizes: cleanSizes
-    }
-  }
-  catch(err)
-  {
-    console.log(err)
-    if(err.statusCode)
-    {
-      let e = buildError(`CleanProducts: ${err.statusCode}`)
-      await sendErrorWebhook(e)
-    }
-    else
-    {
-      let e = buildError(`CleanProducts: ${err}`)
-      console.log(e)
-      await sendErrorWebhook(e)
-    }
-  }
-}
-
-async function getSizes(productURL, proxy)
-{
-  try
-  {
-    let proxyParts = proxy.split(':')
-    let agent = "http://" + proxyParts[0] + ':' + proxyParts[1]
-    let res = await request({
-      url: productURL,
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.90 Safari/537.36'
-      },
-      proxy: agent,
-      resolveWithFullResponse: true,
-      followAllRedirects: true
-    })
-
-    let $ = cheerio.load(res.body)
-    let opt = $('div.sizing-container').find('select-dropdown').attr('options')
-    opt = JSON.parse(opt)
-    return opt
-  }
-  catch(err)
-  {
-    console.log(err)
-    if(err.statusCode)
-    {
-      let e = buildError(`GetSizes: ${err.statusCode}\n${productURL}`)
-      await sendErrorWebhook(e)
-    }
-    else
-    {
-      let e = buildError(`GetSizes: ${err}\n${productURL}`)
-      await sendErrorWebhook(e)
-    }
-  }
-}
-
-function buildNewProduct(product)
-{
-  try
-  {
-    let emb = {
-      username: "Net-A-Porter",
-      avatar_url: "https://i.gyazo.com/266204cae38a101aecf5e4cc072ca696.png",
-      embeds: [
-        {
-          title: `${product.productName}`,
-          url: product.productURL,
-          color: 0xFFFF33,
-          thumbnail: {
-            url: product.productImage
-          },
-          fields: [{
-            name: 'Price',
-            value: product.productPrice 
-          }],
-          footer: {
-            icon_url:
-              "https://i.gyazo.com/266204cae38a101aecf5e4cc072ca696.png",
-            text: "~Woof~#1001"
-          },
-          timestamp: new Date()
-        }
-      ]
-    };
-
-    let sizeFields = []
-    let stockFields = []
-    for(let i in product.productSizes)
-    {
-      sizeFields.push(`[${product.productSizes[i].sizeName}](${product.productSizes[i].atcLink})`)
-      stockFields.push(product.productSizes[i].stockLevel)
-    }
-    emb.embeds[0].fields.push({name: 'Sizes', value: sizeFields.join('\n'), inline: true})
-    emb.embeds[0].fields.push({name: 'Stock Level', value: stockFields.join('\n'), inline: true})
-    return emb
-  }
-  catch(err)
-  {
-    console.log(err)
-  }
-}
-
-function buildRestocked(product)
-{
-  try
-  {
-    let emb = {
-      username: "Net-A-Porter",
-      avatar_url: "https://i.gyazo.com/266204cae38a101aecf5e4cc072ca696.png",
-      embeds: [
-        {
-          title: `${product.productName} Restocked!`,
-          url: product.productURL,
-          color: 0xFFFF33,
-          thumbnail: {
-            url: product.productImage
-          },
-          fields: [{
-            name: 'Price',
-            value: product.productPrice 
-          }],
-          footer: {
-            icon_url:
-              "https://i.gyazo.com/266204cae38a101aecf5e4cc072ca696.png",
-            text: "~Woof~#1001"
-          },
-          timestamp: new Date()
-        }
-      ]
-    };
-
-    let sizeFields = []
-    let stockFields = []
-    for(let i in product.productSizes)
-    {
-      sizeFields.push(`[${product.productSizes[i].sizeName}](${product.productSizes[i].atcLink})`)
-      stockFields.push(product.productSizes[i].stockLevel)
-    }
-    emb.embeds[0].fields.push({name: 'Sizes', value: sizeFields.join('\n'), inline: true})
-    emb.embeds[0].fields.push({name: 'Stock Level', value: stockFields.join('\n'), inline: true})
-    return emb
-  }
-  catch(err)
-  {
-    console.log(err)
-  }
-}
-
-function buildError(error)
-{
-  try
-  {
-    let emb = {
-      username: "Error!",
-      avatar_url: "https://2static1.fjcdn.com/comments/I+figs+dis+me+mayk+u+nise+to+muma+u+_b8b3c240e1ea918170c0a00e5249f795.jpg",
-      embeds: [
-        {
-          title: `FIX YOUR SHIT`,
-          color: 0xFFFF33,
-          description: error,
-          footer: {
-            icon_url:
-              "https://2static1.fjcdn.com/comments/I+figs+dis+me+mayk+u+nise+to+muma+u+_b8b3c240e1ea918170c0a00e5249f795.jpg",
-            text: "~Woof~#1001"
-          },
-          timestamp: new Date()
-        }
-      ]
-    };
-    return emb
-  }
-  catch(err)
-  {
-    console.log(err)
-  }
-}
+})
