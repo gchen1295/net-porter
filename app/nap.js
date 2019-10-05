@@ -737,12 +737,36 @@ function startmonitor2() {
               await found.save()
               
               let emb = buildRestocked(cleanedProduct)
-              await sendUnfilteredDicordWebhook(emb)
+              for(let j = 0; j < unfiltered.length; ++j)
+              {
+                emb.avatar_url = unfiltered[j].logo
+                emb.embeds[0].footer.icon_url = unfiltered[j].logo
+                emb.embeds[0].color = parseInt(unfiltered[j].color)
+                unfilJobs.push(request.post(unfiltered[j].webhook,{
+                  headers: {
+                    'Content-Type': 'application/json'
+                  },
+                  body: JSON.stringify(emb)
+                }))
+              }
+              //await sendUnfilteredDicordWebhook(emb)
               //process.send({type: 'Restock', source: "Unfiltered" ,data: emb})
               if(isMonitored)
               {
+                for(let i = 0; i < unfiltered.length; ++i)
+                {
+                  emb.avatar_url = unfiltered[i].logo
+                  emb.embeds[0].footer.icon_url = unfiltered[i].logo
+                  emb.embeds[0].color = parseInt(unfiltered[i].color)
+                  filtJobs.push(request.post(unfiltered[i].webhook,{
+                    headers: {
+                      'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(emb)
+                  }))
+                }
                 //process.send({type: 'Restock', source: "Filtered", data: emb})
-                await sendFilteredDicordWebhook(emb)
+                //await sendFilteredDicordWebhook(emb)
               }
             }
           }
@@ -765,7 +789,7 @@ function startmonitor2() {
             await newProduct.save()
             
             let emb = buildNewProduct(cleanedProduct)
-            for(let j in unfiltered)
+            for(let j = 0; j < unfiltered.length; ++j)
             {
               emb.avatar_url = unfiltered[j].logo
               emb.embeds[0].footer.icon_url = unfiltered[j].logo
@@ -783,12 +807,25 @@ function startmonitor2() {
             if(isMonitored)
             {
               //process.send({type: 'Restock', source: "Filtered", data: emb})
-              await sendFilteredDicordWebhook(emb)
+              for(let i = 0; i < unfiltered.length; ++i)
+              {
+                emb.avatar_url = unfiltered[i].logo
+                emb.embeds[0].footer.icon_url = unfiltered[i].logo
+                emb.embeds[0].color = parseInt(unfiltered[i].color)
+                filtJobs.push(request.post(unfiltered[i].webhook,{
+                  headers: {
+                    'Content-Type': 'application/json'
+                  },
+                  body: JSON.stringify(emb)
+                }))
+              }
+              //await sendFilteredDicordWebhook(emb)
             }
           }
         }
       }
       que.enqueue(unfilJobs)
+      que.enqueue(filtJobs)
       startmonitor2()
     }
     catch(err)
