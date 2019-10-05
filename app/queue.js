@@ -126,9 +126,9 @@ async function enqueue(jobs, timeout) {
           {
             try {
               await j()
-              await new Promise(resolve =>
-                setTimeout(resolve, timeout)
-              );
+              // await new Promise(resolve =>
+              //   setTimeout(resolve, timeout)
+              // );
           } catch (error) {
               todo.push(j)
               await new Promise(resolve =>
