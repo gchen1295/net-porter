@@ -5,6 +5,7 @@ const cheerio = require('cheerio')
 const housecall = require("housecall");
 const Products = require('./models/product')
 const Config = require('./models/config')
+let que = require('./queue.js')
 let date = new Date()
 let dateFormat = `${date.getFullYear()}-${date.getDay()}-${date.getMonth() + 1} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`
 let queue = housecall({
@@ -44,6 +45,7 @@ mongoose.connect(`mongodb://${mongoserver}/${db}`, {
 })
 mongoose.Promise = global.Promise;
 
+
 let brands = {
   '1840': 'adidas_originals',
   '1051': 'nike',
@@ -61,8 +63,15 @@ var errorHook = process.env.ERRORHOOK
 
 function sendDicordWebhook(emb, webHookURL) {
   try{
-    console.log(emb)
-    
+    let e = emb
+    queue.push(() => {
+      request.post(webHookURL,{
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(e)
+    });
+    });
   }
   catch(err)
   {
@@ -690,6 +699,8 @@ function startmonitor2() {
         cleanedProducts.push(cleanProduct(rawProducts[pr], proxy))
       }
       cleanedProducts = await Promise.all(cleanedProducts)
+      let unfilJobs = []
+      let filtJobs = []
       for(let p in rawProducts)
       {
         let found = await Products.findOne({productID: rawProducts[p].id, productName: rawProducts[p].name})
@@ -753,8 +764,21 @@ function startmonitor2() {
             let newProduct = new Products(cleanedProduct)
             await newProduct.save()
             
-            let emb = buildNewProduct(cleanedProduct) 
-            await sendUnfilteredDicordWebhook(emb)
+            let emb = buildNewProduct(cleanedProduct)
+            for(let j in unfiltered)
+            {
+              emb.avatar_url = unfiltered[i].logo
+              emb.embeds[0].footer.icon_url = unfiltered[i].logo
+              emb.embeds[0].color = parseInt(unfiltered[i].color)
+              unfilJobs.push(request.post(filtered[j].webhook,{
+                headers: {
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(emb)
+              }))
+            }
+            
+            //await sendUnfilteredDicordWebhook(emb)
             //process.send({type: 'Restock', source: "Unfiltered" ,data: emb})
             if(isMonitored)
             {

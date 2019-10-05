@@ -1,6 +1,7 @@
 /**
  * Handles generic RateLimits such as for {@link Command#cooldown}s
  */
+const request = require('request-promise')
 class RateLimit {
 
 	/**
@@ -114,26 +115,31 @@ class RateLimit {
 
 }
 
-module.exports = RateLimit;
-
-async function startRateLimitTets() {
-    let x = new RateLimit(5, 6500)
-    while (messages.length > 0) {
-        try {
-            console.log(x.drip())
+async function enqueue(jobs) {
+  let todo = jobs
+  let x = new RateLimit(5, 5500)
+  while (messages.length > 0) {
+      try {
+          let t = x.drip()
+          let j = todo.shift()
+          if(t.remaining > 0)
+          {
             try {
-                await axios.post('https://discordapp.com/api/webhooks/629565045025669140/rtjNjZi1neEU3ak_O_t5xIrsfHAzCbwwTKYtZ0SdJAxwYsTYL4G7eDoQw-m0peBaVLV1', {
-                    embeds: [{
-                        title: 'TEST Webhook'
-                    }]
-                })
-                messages.shift()
-                console.log('sent')
-            } catch (error) {
-                console.log(error.response.data.retry_after)
-            }
-        } catch (error) {
-        }
-    }
-    console.log('done')
+              await j()
+          } catch (error) {
+              await new Promise(resolve =>
+                setTimeout(resolve, x.remainingTime)
+              );
+          }
+          }
+          
+      } catch (error) {
+        await new Promise(resolve =>
+          setTimeout(resolve, x.remainingTime)
+        );
+        //console.log(error)
+      }
+  }
 }
+
+module.exports = {enqueue};
