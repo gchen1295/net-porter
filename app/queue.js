@@ -118,7 +118,7 @@ class RateLimit {
 async function enqueue(jobs) {
   let todo = jobs
   let x = new RateLimit(5, 5500)
-  while (messages.length > 0) {
+  while (todo.length > 0) {
       try {
           let t = x.drip()
           let j = todo.shift()
