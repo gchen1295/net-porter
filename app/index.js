@@ -223,6 +223,7 @@ bot.on('message', async message => {
         {
           unfilterch = await message.guild.createChannel('nap-unfiltered',{type: 'text'})
           uwh = await unfilterch.createWebhook('NAP Unfiltered')
+          serverInfo.unfilterChannelWH = `https://discordapp.com/api/webhooks/${uwh.id}/${uwh.token}`
           await message.channel.send(`Created <#${unfilterch.id}>`)
         }
         // Create filtered channel
@@ -245,6 +246,7 @@ bot.on('message', async message => {
         {
           filterch = await message.guild.createChannel('nap-filtered',{type: 'text'})
           fwh = await filterch.createWebhook('NAP Filtered')
+          serverInfo.filteredChannelWH = `https://discordapp.com/api/webhooks/${fwh.id}/${fwh.token}`
           await message.channel.send(`Created <#${filterch.id}>`)
         }
         
