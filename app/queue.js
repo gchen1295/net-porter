@@ -119,9 +119,9 @@ async function enqueue(jobs, timeout) {
   let todo = jobs
   let x = new RateLimit(5, 5500)
   while (todo.length > 0) {
-      let t = x.drip()
       let j = todo.shift()
       try {
+          let t = x.drip()
           if(t.remaining > 0)
           {
             try {
