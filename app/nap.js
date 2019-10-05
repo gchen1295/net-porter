@@ -82,11 +82,12 @@ function sendFilteredDicordWebhook(embedData) {
   try{
       for(let j = 0; j < filtered.length; ++j)
       {
-        embedData.avatar_url = filtered[j].logo
-        embedData.embeds[0].footer.icon_url = filtered[j].logo
-        embedData.embeds[0].color = parseInt(filtered[j].color)
-        onsole.log(j)
-        console.log(embedData.avatar_url)
+        let e = embedData
+        e.avatar_url = filtered[j].logo
+        e.embeds[0].footer.icon_url = filtered[j].logo
+        e.embeds[0].color = parseInt(filtered[j].color)
+        console.log(j)
+        console.log(e)
         sendDicordWebhook(embedData, filtered[j].webhook)
       }
   }
