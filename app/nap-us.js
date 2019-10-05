@@ -3,7 +3,7 @@ const request = require('request-promise')
 const mongoose = require('mongoose')
 const cheerio = require('cheerio')
 const housecall = require("housecall");
-const Products = require('./models/productUS')
+const Products = require('./models/product')
 const Config = require('./models/config')
 let date = new Date()
 let dateFormat = `${date.getFullYear()}-${date.getDay()}-${date.getMonth() + 1} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`
@@ -80,11 +80,12 @@ function sendDicordWebhook(embedData, webHookURL) {
 
 function sendFilteredDicordWebhook(embedData) {
   try{
-      for(let j = 0; j < filtered.length; j++)
+      for(let j = 0; j < filtered.length; ++j)
       {
         embedData.avatar_url = filtered[j].logo
         embedData.embeds[0].footer.icon_url = filtered[j].logo
         embedData.embeds[0].color = parseInt(filtered[j].color)
+        console.log(embedData.avatar_url)
         sendDicordWebhook(embedData, filtered[j].webhook)
       }
   }
@@ -96,9 +97,10 @@ function sendFilteredDicordWebhook(embedData) {
 
 function sendUnfilteredDicordWebhook(embedData) {
   try{
-    for(let i = 0; i < unfiltered.length; i++)
+    for(let i = 0; i < unfiltered.length; ++i)
     {
       embedData.avatar_url = unfiltered[i].logo
+      console.log(embedData.avatar_url)
       embedData.embeds[0].footer.icon_url = unfiltered[i].logo
       embedData.embeds[0].color = parseInt(unfiltered[i].color)
       sendDicordWebhook(embedData, unfiltered[i].webhook)
@@ -286,24 +288,30 @@ async function cleanProduct(product, proxy)
     pLink = pLink.normalize("NFD").replace(/[\u0300-\u036f]/g, "")
     let rawSizeData = await getSizes(pLink, proxy)
     let cleanSizes = []
-    for(let j in rawSizeData)
+    if(rawSizeData)
     {
-      let atcLink = `https://www.net-a-porter.com/gb/en/api/basket/addskus/${rawSizeData[j].id}.json`
-      cleanSizes.push({
-        atcLink,
-        stockLevel: rawSizeData[j].stockLevel,
-        sizeName: rawSizeData[j].displaySize
-      })
+      for(let j in rawSizeData)
+      {
+        let atcLink = `https://www.net-a-porter.com/gb/en/api/basket/addskus/${rawSizeData[j].id}.json`
+        cleanSizes.push({
+          atcLink,
+          stockLevel: rawSizeData[j].stockLevel,
+          sizeName: rawSizeData[j].displaySize
+        })
+      }
+      return {
+        productName: product.name,
+        productID,
+        productPrice: price,
+        productURL: pLink,
+        productImage: image,
+        productSizes: cleanSizes
+      }
     }
-
-    return {
-      productName: product.name,
-      productID,
-      productPrice: price,
-      productURL: pLink,
-      productImage: image,
-      productSizes: cleanSizes
-    }
+    else
+    {
+      return undefined
+    }   
   }
   catch(err)
   {
@@ -357,13 +365,20 @@ async function getSizes(productURL, proxy)
     {
       let stock = $('input.sku').attr('data-stock')
       let sku = $('input.sku').attr('value')
-      return {
-        stockLevel: stock,
-        displaySize: 'One Size',
-        id: sku,
-        value: sku,
-        name: 'One Size ',
-        data: { size: 'One Size', stock: stock, moreComingSoon: '' }
+      if(stock && sku)
+      {
+        return {
+          stockLevel: stock,
+          displaySize: 'One Size',
+          id: sku,
+          value: sku,
+          name: 'One Size ',
+          data: { size: 'One Size', stock: stock, moreComingSoon: '' }
+        }
+      }
+      else
+      {
+        return undefined
       }
     }
     
@@ -560,7 +575,7 @@ async function getAllProductsAPI(proxy)
     
     
     let res = await request({
-      url: 'https://api.net-a-porter.com/NAP/GB/en/1600/0/summaries?brandIds=1051,1212,1840,2606',
+      url: 'https://api.net-a-porter.com/NAP/US/en/1600/0/summaries?brandIds=1051,1212,1840,2606',
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.90 Safari/537.36'
       },
@@ -603,7 +618,6 @@ function startmonitor2() {
       console.log(proxy)
       let rawProducts = await getAllProductsAPI(proxy)
       let matchedProducts = []
-      console.log(rawProducts)
       //let cleaned = await cleanProduct(p[i], '')
 
       if(kwSets.length > 0)
@@ -655,20 +669,20 @@ function startmonitor2() {
           }
         }
       }
-      
-      for(let i in rawProducts)
+      let cleanedProducts = []
+      for(let pr in rawProducts)
       {
-        let found = await Products.findOne({productID: rawProducts[i].id, productName: rawProducts[i].name})
-        let cleanedProduct
+        proxy = currPlist.shift()
+        currPlist.push(proxy)
+        cleanedProducts.push(cleanProduct(rawProducts[pr], proxy))
+      }
+      cleanedProducts = await Promise.all(cleanedProducts)
+      for(let p in rawProducts)
+      {
+        let found = await Products.findOne({productID: rawProducts[p].id, productName: rawProducts[p].name})
+        
         if(found)
         {
-
-          if(i % 5 === 0)
-          {
-            proxy = currPlist.shift()
-            currPlist.push(proxy)
-            console.log(proxy)
-          }
           let isMonitored = false
           for(let j in matchedProducts)
           {
@@ -677,25 +691,56 @@ function startmonitor2() {
               isMonitored = true
             }
           }
-          cleanedProduct = await cleanProduct(rawProducts[i], proxy)
+
+          let cleanedProduct = cleanedProducts[p]
           
-          // Check for restocks
-          let restocked = false
-          let foundSizes = JSON.parse(JSON.stringify(found.productSizes))
-          for(let i in foundSizes)
+          if(cleanedProduct)
           {
-            if(foundSizes[i].stockLevel === 'Out_of_Stock' && cleanedProduct.productSizes[i].stockLevel !== 'Out_of_Stock')
+            // Check for restocks
+            let restocked = false
+            let foundSizes = JSON.parse(JSON.stringify(found.productSizes))
+            for(let i in foundSizes)
             {
-              restocked = true
-              break;
+              if(foundSizes[i].stockLevel === 'Out_of_Stock' && cleanedProduct.productSizes[i].stockLevel !== 'Out_of_Stock')
+              {
+                restocked = true
+                break;
+              }
+            }
+            if(restocked)
+            {
+              found.productSizes = cleanedProduct.productSizes
+              await found.save()
+              
+              let emb = buildRestocked(cleanedProduct)
+              await sendUnfilteredDicordWebhook(emb)
+              //process.send({type: 'Restock', source: "Unfiltered" ,data: emb})
+              if(isMonitored)
+              {
+                //process.send({type: 'Restock', source: "Filtered", data: emb})
+                await sendFilteredDicordWebhook(emb)
+              }
             }
           }
-          if(restocked)
+        }
+        else
+        {
+          let isMonitored = false
+          for(let j in matchedProducts)
           {
-            found.productSizes = cleanedProduct.productSizes
-            await found.save()
+            if(matchedProducts[j].name === rawProducts[p].name)
+            {
+              isMonitored = true
+            }
+          }
+          let cleanedProduct = cleanedProducts[p]
+          // Save product and push notif
+          if(cleanedProduct)
+          {
+            let newProduct = new Products(cleanedProduct)
+            await newProduct.save()
             
-            let emb = buildRestocked(cleanedProduct)
+            let emb = buildNewProduct(cleanedProduct) 
             await sendUnfilteredDicordWebhook(emb)
             //process.send({type: 'Restock', source: "Unfiltered" ,data: emb})
             if(isMonitored)
@@ -705,41 +750,12 @@ function startmonitor2() {
             }
           }
         }
-        else
-        {
-          if(i % 5 === 0)
-          {
-            proxy = currPlist.shift()
-            currPlist.push(proxy)
-          }
-          let isMonitored = false
-          for(let j in matchedProducts)
-          {
-            if(matchedProducts[j].name === rawProducts[i].name)
-            {
-              isMonitored = true
-            }
-          }
-          cleanedProduct = await cleanProduct(rawProducts[i], proxy)
-          // Save product and push notif
-          //console.log(cleanedProduct)
-          let newProduct = new Products(cleanedProduct)
-          await newProduct.save()
-          
-          let emb = buildNewProduct(cleanedProduct) 
-          await sendUnfilteredDicordWebhook(emb)
-          //process.send({type: 'Restock', source: "Unfiltered" ,data: emb})
-          if(isMonitored)
-          {
-            //process.send({type: 'Restock', source: "Filtered", data: emb})
-            await sendFilteredDicordWebhook(emb)
-          }
-        }
       }
       startmonitor2()
     }
     catch(err)
     {
+      console.log(err)
       if(err.statusCode)
       {
         let e = buildError(`Main process: ${err.statusCode}`)
@@ -748,7 +764,6 @@ function startmonitor2() {
       else
       {
         let e = buildError(`Main process: ${err}`)
-        console.log(e)
         await sendErrorWebhook(e)
       }
       startmonitor2()
