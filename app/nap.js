@@ -85,6 +85,7 @@ function sendFilteredDicordWebhook(embedData) {
         embedData.avatar_url = filtered[j].logo
         embedData.embeds[0].footer.icon_url = filtered[j].logo
         embedData.embeds[0].color = parseInt(filtered[j].color)
+        onsole.log(j)
         console.log(embedData.avatar_url)
         sendDicordWebhook(embedData, filtered[j].webhook)
       }
