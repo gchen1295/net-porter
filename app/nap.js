@@ -88,7 +88,7 @@ function sendFilteredDicordWebhook(embedData) {
         e.embeds[0].color = parseInt(filtered[j].color)
         console.log(j)
         console.log(e)
-        sendDicordWebhook(embedData, filtered[j].webhook)
+        sendDicordWebhook(e, filtered[j].webhook)
       }
   }
   catch(err)
@@ -106,7 +106,7 @@ function sendUnfilteredDicordWebhook(embedData) {
       e.embeds[0].footer.icon_url = unfiltered[i].logo
       e.embeds[0].color = parseInt(unfiltered[i].color)
       console.log(e)
-      sendDicordWebhook(embedData, unfiltered[i].webhook)
+      sendDicordWebhook(e, unfiltered[i].webhook)
       
     }
   }
