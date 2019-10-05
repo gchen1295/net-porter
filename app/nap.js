@@ -793,12 +793,12 @@ function startmonitor2() {
               emb.avatar_url = unfiltered[j].logo
               emb.embeds[0].footer.icon_url = unfiltered[j].logo
               emb.embeds[0].color = parseInt(unfiltered[j].color)
-              jobs.push(request.post(unfiltered[j].webhook,{
+              jobs.push(()=>(request.post(unfiltered[j].webhook,{
                 headers: {
                   'Content-Type': 'application/json'
                 },
                 body: JSON.stringify(emb)
-              }))
+              })))
             }
             
             //await sendUnfilteredDicordWebhook(emb)
