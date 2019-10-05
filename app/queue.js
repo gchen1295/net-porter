@@ -134,6 +134,7 @@ async function enqueue(jobs, timeout) {
               await new Promise(resolve =>
                 setTimeout(resolve, x.remainingTime)
               );
+              enqueue(todo, timeout)
           }
           }  
       } catch (error) {
@@ -141,6 +142,7 @@ async function enqueue(jobs, timeout) {
         await new Promise(resolve =>
           setTimeout(resolve, x.remainingTime)
         );
+        enqueue(todo, timeout)
         //console.log(error)
       }
   }
