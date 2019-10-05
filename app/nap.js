@@ -5,13 +5,13 @@ const cheerio = require('cheerio')
 const housecall = require("housecall");
 const Products = require('./models/product')
 const Config = require('./models/config')
-let que = require('./queue.js')
+var Queue = require('async-function-queue');
 let date = new Date()
 let dateFormat = `${date.getFullYear()}-${date.getDay()}-${date.getMonth() + 1} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`
-let queue = housecall({
-  concurrency: 1,
-  cooldown: 750
-});
+// let queue = housecall({
+//   concurrency: 1,
+//   cooldown: 750
+// });
 
 Config.watch().on('change', async d=>{
   if(d.operationType === 'update')
@@ -45,6 +45,7 @@ mongoose.connect(`mongodb://${mongoserver}/${db}`, {
 })
 mongoose.Promise = global.Promise;
 
+var queue = Queue(1)
 
 let brands = {
   '1840': 'adidas_originals',
@@ -801,24 +802,24 @@ function startmonitor2() {
               }))
             }
             
-            //await sendUnfilteredDicordWebhook(emb)
+            await sendUnfilteredDicordWebhook(emb)
             //process.send({type: 'Restock', source: "Unfiltered" ,data: emb})
             if(isMonitored)
             {
               //process.send({type: 'Restock', source: "Filtered", data: emb})
-              for(let i = 0; i < unfiltered.length; ++i)
-              {
-                emb.avatar_url = unfiltered[i].logo
-                emb.embeds[0].footer.icon_url = unfiltered[i].logo
-                emb.embeds[0].color = parseInt(unfiltered[i].color)
-                jobs.push(request.post(unfiltered[i].webhook,{
-                  headers: {
-                    'Content-Type': 'application/json'
-                  },
-                  body: JSON.stringify(emb)
-                }))
-              }
-              //await sendFilteredDicordWebhook(emb)
+              // for(let i = 0; i < unfiltered.length; ++i)
+              // {
+              //   emb.avatar_url = unfiltered[i].logo
+              //   emb.embeds[0].footer.icon_url = unfiltered[i].logo
+              //   emb.embeds[0].color = parseInt(unfiltered[i].color)
+              //   jobs.push(request.post(unfiltered[i].webhook,{
+              //     headers: {
+              //       'Content-Type': 'application/json'
+              //     },
+              //     body: JSON.stringify(emb)
+              //   }))
+              // }
+              await sendFilteredDicordWebhook(emb)
             }
           }
         }
