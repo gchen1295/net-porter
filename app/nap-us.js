@@ -3,20 +3,44 @@ const request = require('request-promise')
 const mongoose = require('mongoose')
 const cheerio = require('cheerio')
 const housecall = require("housecall");
-const Products = require('./models/product')
-let Servers = require('./models/servers.js')
+const Products = require('./models/productUS')
+const Config = require('./models/config')
 let date = new Date()
 let dateFormat = `${date.getFullYear()}-${date.getDay()}-${date.getMonth() + 1} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`
 let queue = housecall({
   concurrency: 1,
-  cooldown: 1100
+  cooldown: 750
 });
 
-Servers.watch().on('change', d=>{console.log(d)})
-
-mongoose.connect(`mongodb://127.0.0.1:27017/net-a-porter`, {
+Config.watch().on('change', async d=>{
+  if(d.operationType === 'update')
+  {
+    let config = await Config.findOne()
+    if(config)
+    {
+      kwSets = config.keywords
+      proxies = config.proxies
+      filtered = config.filtered
+      unfiltered = config.unfiltered
+    }
+  }
+})
+const mongoserver = process.env.MONGO_SERVER
+const db = process.env.MONGO_DB
+mongoose.connect(`mongodb://${mongoserver}/${db}`, {
   useNewUrlParser: true,
   useCreateIndex: true
+}, async (err,cl)=>{
+  if(err) return
+  let config = await Config.findOne()
+  if(config)
+  {
+    kwSets = config.keywords
+    proxies = config.proxies
+    filtered = config.filtered
+    unfiltered = config.unfiltered
+    await startmonitor2()
+  }
 })
 mongoose.Promise = global.Promise;
 
@@ -29,46 +53,57 @@ let brands = {
 
 let kwSets = []
 let proxies = []
+let filtered = []
+let unfiltered = []
 
-process.on('message', async data =>{
-  if(data.type === 'start')
-  {
-    let server = await Servers.findOne({serverID: data.serverID})
-    serverName = server.serverName
-    proxies = server.proxies
-    
-    kwSets = server.keywords
-    filteredOn = true
-    startmonitor2()
-  }
-  // if(data.type === 'startUnfiltered')
-  // {
-  //   serverName = data.serverName
-  //   startmonitor2()
-  // }
-  if(data.type === 'updateProxy')
-  {
-    proxies.concat(data.proxyList)
-  }
-  if(data.type === 'addKW')
-  {
-    kwSets.push(data.keywords)
-  }
-})
-
-var webHookURL = process.env.WEBHOOK
+// var webHookURL = process.env.WEBHOOK
 var errorHook = process.env.ERRORHOOK
 
-function sendDicordWebhook(embedData) {
+function sendDicordWebhook(embedData, webHookURL) {
   try{
-      queue.push(() => {
+    queue.push(() => {
         request.post(webHookURL,{
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(embedData)
-        });
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(embedData)
       });
+    });
+  }
+  catch(err)
+  {
+    console.log(webHookURL)
+    console.log(embedData)
+    console.log(err)
+  }
+}
+
+function sendFilteredDicordWebhook(embedData) {
+  try{
+      for(let j = 0; j < filtered.length; j++)
+      {
+        embedData.avatar_url = filtered[j].logo
+        embedData.embeds[0].footer.icon_url = filtered[j].logo
+        embedData.embeds[0].color = parseInt(filtered[j].color)
+        sendDicordWebhook(embedData, filtered[j].webhook)
+      }
+  }
+  catch(err)
+  {
+    console.log(err)
+  }
+}
+
+function sendUnfilteredDicordWebhook(embedData) {
+  try{
+    for(let i = 0; i < unfiltered.length; i++)
+    {
+      embedData.avatar_url = unfiltered[i].logo
+      embedData.embeds[0].footer.icon_url = unfiltered[i].logo
+      embedData.embeds[0].color = parseInt(unfiltered[i].color)
+      sendDicordWebhook(embedData, unfiltered[i].webhook)
+      
+    }
   }
   catch(err)
   {
@@ -92,8 +127,6 @@ function sendErrorWebhook(embedData) {
     console.log(err)
   }
 }
-
-//startmonitor()
 
 function startmonitor() {
   setTimeout(async function () {
@@ -308,7 +341,7 @@ async function getSizes(productURL, proxy)
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.90 Safari/537.36'
       },
-      //proxy: agent,
+      proxy: agent,
       resolveWithFullResponse: true,
       followAllRedirects: true
     })
@@ -357,7 +390,7 @@ function buildNewProduct(product)
   {
     let emb = {
       username: "Net-A-Porter",
-      avatar_url: "https://i.gyazo.com/266204cae38a101aecf5e4cc072ca696.png",
+      avatar_url: "https://cdn.discordapp.com/icons/613371089158012938/1fd21f22b481124632a7149a4434a851.png?size=128",
       embeds: [
         {
           title: `${product.productName}`,
@@ -372,7 +405,7 @@ function buildNewProduct(product)
           }],
           footer: {
             icon_url:
-              "https://i.gyazo.com/266204cae38a101aecf5e4cc072ca696.png",
+              "https://cdn.discordapp.com/icons/613371089158012938/1fd21f22b481124632a7149a4434a851.png?size=128",
             text: "~Woof~#1001"
           },
           timestamp: new Date()
@@ -381,55 +414,33 @@ function buildNewProduct(product)
     };
 
     let sizeFields = []
+    let sizeFields2 = []
     let stockFields = []
+    let stockFields2 = []
+    let limit = 0
     for(let i in product.productSizes)
     {
-      sizeFields.push(`[${product.productSizes[i].sizeName}](${product.productSizes[i].atcLink})`)
-      stockFields.push(product.productSizes[i].stockLevel)
+      let f = `[${product.productSizes[i].sizeName}](${product.productSizes[i].atcLink})`
+      if(limit < 850)
+      {
+        limit += f.length
+        sizeFields.push(f)
+        stockFields.push(product.productSizes[i].stockLevel)
+      }
+      else
+      {
+        sizeFields2.push(f)
+        stockFields2.push(product.productSizes[i].stockLevel)
+      }
     }
+
     emb.embeds[0].fields.push({name: 'Sizes', value: sizeFields.join('\n'), inline: true})
     emb.embeds[0].fields.push({name: 'Stock Level', value: stockFields.join('\n'), inline: true})
-    return emb
-  }
-  catch(err)
-  {
-    console.log(err)
-  }
-}
-
-function buildNewProductDiscord(product)
-{
-  try
-  {
-    let emb = 
-        {
-          title: `${product.productName}`,
-          url: product.productURL,
-          color: 0xFFFF33,
-          thumbnail: {
-            url: product.productImage
-          },
-          fields: [{
-            name: 'Price',
-            value: product.productPrice 
-          }],
-          footer: {
-            icon_url:
-              "https://i.gyazo.com/266204cae38a101aecf5e4cc072ca696.png",
-            text: "~Woof~#1001"
-          },
-          timestamp: new Date()
-        }
-
-    let sizeFields = []
-    let stockFields = []
-    for(let i in product.productSizes)
+    if(sizeFields2.length > 0)
     {
-      sizeFields.push(`[${product.productSizes[i].sizeName}](${product.productSizes[i].atcLink})`)
-      stockFields.push(product.productSizes[i].stockLevel)
+      emb.embeds[0].fields.push({name: 'Sizes', value: sizeFields2.join('\n'), inline: true})
+      emb.embeds[0].fields.push({name: 'Stock Level', value: stockFields2.join('\n'), inline: true})
     }
-    emb.fields.push({name: 'Sizes', value: sizeFields.join('\n'), inline: true})
-    emb.fields.push({name: 'Stock Level', value: stockFields.join('\n'), inline: true})
     return emb
   }
   catch(err)
@@ -444,7 +455,7 @@ function buildRestocked(product)
   {
     let emb = {
       username: "Net-A-Porter",
-      avatar_url: "https://i.gyazo.com/266204cae38a101aecf5e4cc072ca696.png",
+      avatar_url: "https://cdn.discordapp.com/icons/613371089158012938/1fd21f22b481124632a7149a4434a851.png?size=128",
       embeds: [
         {
           title: `${product.productName} Restocked!`,
@@ -459,7 +470,7 @@ function buildRestocked(product)
           }],
           footer: {
             icon_url:
-              "https://i.gyazo.com/266204cae38a101aecf5e4cc072ca696.png",
+              "https://cdn.discordapp.com/icons/613371089158012938/1fd21f22b481124632a7149a4434a851.png?size=128",
             text: "~Woof~#1001"
           },
           timestamp: new Date()
@@ -468,56 +479,33 @@ function buildRestocked(product)
     };
 
     let sizeFields = []
+    let sizeFields2 = []
     let stockFields = []
+    let stockFields2 = []
+    let limit = 0
     for(let i in product.productSizes)
     {
-      sizeFields.push(`[${product.productSizes[i].sizeName}](${product.productSizes[i].atcLink})`)
-      stockFields.push(product.productSizes[i].stockLevel)
+      let f = `[${product.productSizes[i].sizeName}](${product.productSizes[i].atcLink})`
+      if(limit < 900)
+      {
+        limit += f.length
+        sizeFields.push(f)
+        stockFields.push(product.productSizes[i].stockLevel)
+      }
+      else
+      {
+        sizeFields2.push(f)
+        stockFields2.push(product.productSizes[i].stockLevel)
+      }
     }
+
     emb.embeds[0].fields.push({name: 'Sizes', value: sizeFields.join('\n'), inline: true})
     emb.embeds[0].fields.push({name: 'Stock Level', value: stockFields.join('\n'), inline: true})
-    return emb
-  }
-  catch(err)
-  {
-    console.log(err)
-  }
-}
-
-function buildRestockedDiscord(product)
-{
-  try
-  {
-    let emb = 
-        {
-          title: `${product.productName} Restocked!`,
-          url: product.productURL,
-          color: 0xFFFF33,
-          thumbnail: {
-            url: product.productImage
-          },
-          fields: [{
-            name: 'Price',
-            value: product.productPrice 
-          }],
-          footer: {
-            icon_url:
-              "https://i.gyazo.com/266204cae38a101aecf5e4cc072ca696.png",
-            text: "~Woof~#1001"
-          },
-          timestamp: new Date()
-        }
-  
-
-    let sizeFields = []
-    let stockFields = []
-    for(let i in product.productSizes)
+    if(sizeFields2.length > 0)
     {
-      sizeFields.push(`[${product.productSizes[i].sizeName}](${product.productSizes[i].atcLink})`)
-      stockFields.push(product.productSizes[i].stockLevel)
+      emb.embeds[0].fields.push({name: 'Sizes', value: sizeFields2.join('\n'), inline: true})
+      emb.embeds[0].fields.push({name: 'Stock Level', value: stockFields2.join('\n'), inline: true})
     }
-    emb.fields.push({name: 'Sizes', value: sizeFields.join('\n'), inline: true})
-    emb.fields.push({name: 'Stock Level', value: stockFields.join('\n'), inline: true})
     return emb
   }
   catch(err)
@@ -532,7 +520,7 @@ function buildError(error)
   {
     let emb = {
       username: "Error!",
-      avatar_url: "https://2static1.fjcdn.com/comments/I+figs+dis+me+mayk+u+nise+to+muma+u+_b8b3c240e1ea918170c0a00e5249f795.jpg",
+      avatar_url: "https://cdn.discordapp.com/icons/613371089158012938/1fd21f22b481124632a7149a4434a851.png?size=128",
       embeds: [
         {
           title: `FIX YOUR SHIT`,
@@ -540,7 +528,7 @@ function buildError(error)
           description: error,
           footer: {
             icon_url:
-              "https://2static1.fjcdn.com/comments/I+figs+dis+me+mayk+u+nise+to+muma+u+_b8b3c240e1ea918170c0a00e5249f795.jpg",
+              "https://cdn.discordapp.com/icons/613371089158012938/1fd21f22b481124632a7149a4434a851.png?size=128",
             text: "~Woof~#1001"
           },
           timestamp: new Date()
@@ -576,7 +564,7 @@ async function getAllProductsAPI(proxy)
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.90 Safari/537.36'
       },
-      //proxy: agent,
+      proxy: agent,
       resolveWithFullResponse: true,
       followAllRedirects: true
     })
@@ -605,20 +593,22 @@ function startmonitor2() {
     try{
       if(proxies.length === 0)
       {
-        process.send({type: 'Error', message: 'No proxies!'})
+        console.log("Waiting on proxies")
+        startmonitor2()
         return
       }
       let proxy = proxies.shift()
+      let currPlist = proxies
       proxies.push(proxy)
       console.log(proxy)
       let rawProducts = await getAllProductsAPI(proxy)
       let matchedProducts = []
-
+      console.log(rawProducts)
       //let cleaned = await cleanProduct(p[i], '')
 
       if(kwSets.length > 0)
       {
-        for(let j in kwSets)
+        for(let j = 0; j < kwSets.length; j++)
         {
           let kws = kwSets[j].split(',')
           let pkw = []
@@ -666,8 +656,6 @@ function startmonitor2() {
         }
       }
       
-      
-
       for(let i in rawProducts)
       {
         let found = await Products.findOne({productID: rawProducts[i].id, productName: rawProducts[i].name})
@@ -677,19 +665,20 @@ function startmonitor2() {
 
           if(i % 5 === 0)
           {
-            proxy = proxies.shift()
-            proxies.push(proxy)
+            proxy = currPlist.shift()
+            currPlist.push(proxy)
             console.log(proxy)
           }
           let isMonitored = false
-          for(let i in matchedProducts)
+          for(let j in matchedProducts)
           {
-            if(matchedProducts[i].name === found.productName)
+            if(matchedProducts[j].name === found.productName)
             {
               isMonitored = true
             }
           }
           cleanedProduct = await cleanProduct(rawProducts[i], proxy)
+          
           // Check for restocks
           let restocked = false
           let foundSizes = JSON.parse(JSON.stringify(found.productSizes))
@@ -706,12 +695,13 @@ function startmonitor2() {
             found.productSizes = cleanedProduct.productSizes
             await found.save()
             
-            let emb = buildRestockedDiscord(cleanedProduct)
-            //await sendDicordWebhook(emb)
-            process.send({type: 'Restock', source: "Unfiltered" ,data: emb})
+            let emb = buildRestocked(cleanedProduct)
+            await sendUnfilteredDicordWebhook(emb)
+            //process.send({type: 'Restock', source: "Unfiltered" ,data: emb})
             if(isMonitored)
             {
-              process.send({type: 'Restock', source: "Filtered", data: emb})
+              //process.send({type: 'Restock', source: "Filtered", data: emb})
+              await sendFilteredDicordWebhook(emb)
             }
           }
         }
@@ -719,28 +709,30 @@ function startmonitor2() {
         {
           if(i % 5 === 0)
           {
-            proxy = proxies.shift()
-            proxies.push(proxy)
+            proxy = currPlist.shift()
+            currPlist.push(proxy)
           }
           let isMonitored = false
-          for(let i in matchedProducts)
+          for(let j in matchedProducts)
           {
-            if(matchedProducts[i].name === rawProducts[i].name)
+            if(matchedProducts[j].name === rawProducts[i].name)
             {
               isMonitored = true
             }
           }
           cleanedProduct = await cleanProduct(rawProducts[i], proxy)
           // Save product and push notif
+          //console.log(cleanedProduct)
           let newProduct = new Products(cleanedProduct)
           await newProduct.save()
           
-          let emb = buildNewProductDiscord(cleanedProduct) 
-          //await sendDicordWebhook(emb)
-          process.send({type: 'New Product', source: "Unfiltered", data: emb})
+          let emb = buildNewProduct(cleanedProduct) 
+          await sendUnfilteredDicordWebhook(emb)
+          //process.send({type: 'Restock', source: "Unfiltered" ,data: emb})
           if(isMonitored)
           {
-            process.send({type: 'Restock', source: "Filtered", data: emb})
+            //process.send({type: 'Restock', source: "Filtered", data: emb})
+            await sendFilteredDicordWebhook(emb)
           }
         }
       }
@@ -748,7 +740,6 @@ function startmonitor2() {
     }
     catch(err)
     {
-      console.log(err)
       if(err.statusCode)
       {
         let e = buildError(`Main process: ${err.statusCode}`)

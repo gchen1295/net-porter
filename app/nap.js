@@ -80,11 +80,12 @@ function sendDicordWebhook(embedData, webHookURL) {
 
 function sendFilteredDicordWebhook(embedData) {
   try{
-      for(let j = 0; j < filtered.length; j++)
+      for(let j = 0; j < filtered.length; ++j)
       {
         embedData.avatar_url = filtered[j].logo
         embedData.embeds[0].footer.icon_url = filtered[j].logo
         embedData.embeds[0].color = parseInt(filtered[j].color)
+        console.log(embedData.avatar_url)
         sendDicordWebhook(embedData, filtered[j].webhook)
       }
   }
@@ -96,9 +97,10 @@ function sendFilteredDicordWebhook(embedData) {
 
 function sendUnfilteredDicordWebhook(embedData) {
   try{
-    for(let i = 0; i < unfiltered.length; i++)
+    for(let i = 0; i < unfiltered.length; ++i)
     {
       embedData.avatar_url = unfiltered[i].logo
+      console.log(embedData.avatar_url)
       embedData.embeds[0].footer.icon_url = unfiltered[i].logo
       embedData.embeds[0].color = parseInt(unfiltered[i].color)
       sendDicordWebhook(embedData, unfiltered[i].webhook)
@@ -560,7 +562,7 @@ async function getAllProductsAPI(proxy)
     
     
     let res = await request({
-      url: 'https://api.net-a-porter.com/NAP/GB/en/1600/0/summaries?brandIds=1051,1212,1840,2606',
+      url: 'https://api.net-a-porter.com/NAP/US/en/1600/0/summaries?brandIds=1051,1212,1840,2606',
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.90 Safari/537.36'
       },

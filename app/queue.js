@@ -116,10 +116,6 @@ class RateLimit {
 
 module.exports = RateLimit;
 
-let messages = ['hello', 'world','hello', 'world','hello', 'world','hello', 'world']
-
-startRateLimitTets()
-
 async function startRateLimitTets() {
     let x = new RateLimit(5, 6500)
     while (messages.length > 0) {
