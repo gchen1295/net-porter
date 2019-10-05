@@ -519,7 +519,7 @@ function buildError(error)
   {
     let emb = {
       username: "Error!",
-      avatar_url: "https://2static1.fjcdn.com/comments/I+figs+dis+me+mayk+u+nise+to+muma+u+_b8b3c240e1ea918170c0a00e5249f795.jpg",
+      avatar_url: "https://cdn.discordapp.com/icons/613371089158012938/1fd21f22b481124632a7149a4434a851.png?size=128",
       embeds: [
         {
           title: `FIX YOUR SHIT`,
@@ -527,7 +527,7 @@ function buildError(error)
           description: error,
           footer: {
             icon_url:
-              "https://2static1.fjcdn.com/comments/I+figs+dis+me+mayk+u+nise+to+muma+u+_b8b3c240e1ea918170c0a00e5249f795.jpg",
+              "https://cdn.discordapp.com/icons/613371089158012938/1fd21f22b481124632a7149a4434a851.png?size=128",
             text: "~Woof~#1001"
           },
           timestamp: new Date()

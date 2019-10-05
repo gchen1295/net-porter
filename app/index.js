@@ -37,7 +37,12 @@ bot.on('message', async message => {
   let msgprefix = args[0].substring(0, prefix.length)
   if(msgprefix !== prefix) return 
   let cmd = args[0].substring(prefix.length, args[0].length)
-  let serverInfo = await Servers.findOne({serverID: message.guild.id})
+  let serverInfo
+  if(message.channel.type !== 'dm')
+  {
+    serverInfo = await Servers.findOne({serverID: message.guild.id})
+  }
+   
   if(message.author.id === owner.id)
   {
     if(cmd === 'auth')
