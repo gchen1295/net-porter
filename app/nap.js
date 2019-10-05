@@ -62,14 +62,7 @@ var errorHook = process.env.ERRORHOOK
 function sendDicordWebhook(emb, webHookURL) {
   try{
     console.log(emb)
-    queue.push(() => {
-        request.post(webHookURL,{
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(emb)
-      });
-    });
+    
   }
   catch(err)
   {
@@ -87,9 +80,16 @@ function sendFilteredDicordWebhook(embedData) {
         e.avatar_url = filtered[j].logo
         e.embeds[0].footer.icon_url = filtered[j].logo
         e.embeds[0].color = parseInt(filtered[j].color)
-        console.log(j)
-        console.log(e)
-        sendDicordWebhook(e, filtered[j].webhook)
+
+        queue.push(() => {
+          request.post(filtered[j].webhook,{
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(e)
+        });
+      });
+        //sendDicordWebhook(e, filtered[j].webhook)
       }
   }
   catch(err)
@@ -106,7 +106,16 @@ function sendUnfilteredDicordWebhook(embedData) {
       e.avatar_url = unfiltered[i].logo
       e.embeds[0].footer.icon_url = unfiltered[i].logo
       e.embeds[0].color = parseInt(unfiltered[i].color)
-      sendDicordWebhook(e, unfiltered[i].webhook)
+      
+      queue.push(() => {
+        request.post(unfiltered[i].webhook,{
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(e)
+      });
+    });
+      //sendDicordWebhook(e, unfiltered[i].webhook)
       
     }
   }
