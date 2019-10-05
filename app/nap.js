@@ -603,7 +603,7 @@ function startmonitor2() {
       console.log(proxy)
       let rawProducts = await getAllProductsAPI(proxy)
       let matchedProducts = []
-
+      console.log(rawProducts)
       //let cleaned = await cleanProduct(p[i], '')
 
       if(kwSets.length > 0)
