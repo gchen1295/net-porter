@@ -767,10 +767,10 @@ function startmonitor2() {
             let emb = buildNewProduct(cleanedProduct)
             for(let j in unfiltered)
             {
-              emb.avatar_url = unfiltered[i].logo
-              emb.embeds[0].footer.icon_url = unfiltered[i].logo
-              emb.embeds[0].color = parseInt(unfiltered[i].color)
-              unfilJobs.push(request.post(filtered[j].webhook,{
+              emb.avatar_url = unfiltered[j].logo
+              emb.embeds[0].footer.icon_url = unfiltered[j].logo
+              emb.embeds[0].color = parseInt(unfiltered[j].color)
+              unfilJobs.push(request.post(unfiltered[j].webhook,{
                 headers: {
                   'Content-Type': 'application/json'
                 },
