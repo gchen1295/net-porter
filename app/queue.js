@@ -119,21 +119,22 @@ async function enqueue(jobs) {
   let todo = jobs
   let x = new RateLimit(5, 5500)
   while (todo.length > 0) {
+      let t = x.drip()
+      let j = todo.shift()
       try {
-          let t = x.drip()
-          let j = todo.shift()
           if(t.remaining > 0)
           {
             try {
               await j()
           } catch (error) {
+              todo.push(j)
               await new Promise(resolve =>
                 setTimeout(resolve, x.remainingTime)
               );
           }
-          }
-          
+          }    
       } catch (error) {
+        todo.push(j)
         await new Promise(resolve =>
           setTimeout(resolve, x.remainingTime)
         );

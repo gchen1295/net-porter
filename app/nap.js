@@ -699,8 +699,7 @@ function startmonitor2() {
         cleanedProducts.push(cleanProduct(rawProducts[pr], proxy))
       }
       cleanedProducts = await Promise.all(cleanedProducts)
-      let unfilJobs = []
-      let filtJobs = []
+      let jobs = []
       for(let p in rawProducts)
       {
         let found = await Products.findOne({productID: rawProducts[p].id, productName: rawProducts[p].name})
@@ -742,7 +741,7 @@ function startmonitor2() {
                 emb.avatar_url = unfiltered[j].logo
                 emb.embeds[0].footer.icon_url = unfiltered[j].logo
                 emb.embeds[0].color = parseInt(unfiltered[j].color)
-                unfilJobs.push(request.post(unfiltered[j].webhook,{
+                jobs.push(request.post(unfiltered[j].webhook,{
                   headers: {
                     'Content-Type': 'application/json'
                   },
@@ -758,7 +757,7 @@ function startmonitor2() {
                   emb.avatar_url = unfiltered[i].logo
                   emb.embeds[0].footer.icon_url = unfiltered[i].logo
                   emb.embeds[0].color = parseInt(unfiltered[i].color)
-                  filtJobs.push(request.post(unfiltered[i].webhook,{
+                  jobs.push(request.post(unfiltered[i].webhook,{
                     headers: {
                       'Content-Type': 'application/json'
                     },
@@ -794,7 +793,7 @@ function startmonitor2() {
               emb.avatar_url = unfiltered[j].logo
               emb.embeds[0].footer.icon_url = unfiltered[j].logo
               emb.embeds[0].color = parseInt(unfiltered[j].color)
-              unfilJobs.push(request.post(unfiltered[j].webhook,{
+              jobs.push(request.post(unfiltered[j].webhook,{
                 headers: {
                   'Content-Type': 'application/json'
                 },
@@ -812,7 +811,7 @@ function startmonitor2() {
                 emb.avatar_url = unfiltered[i].logo
                 emb.embeds[0].footer.icon_url = unfiltered[i].logo
                 emb.embeds[0].color = parseInt(unfiltered[i].color)
-                filtJobs.push(request.post(unfiltered[i].webhook,{
+                jobs.push(request.post(unfiltered[i].webhook,{
                   headers: {
                     'Content-Type': 'application/json'
                   },
@@ -824,8 +823,7 @@ function startmonitor2() {
           }
         }
       }
-      que.enqueue(unfilJobs)
-      que.enqueue(filtJobs)
+      que.enqueue(jobs)
       startmonitor2()
     }
     catch(err)
