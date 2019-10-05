@@ -61,6 +61,7 @@ var errorHook = process.env.ERRORHOOK
 
 function sendDicordWebhook(embedData, webHookURL) {
   try{
+    console.log(embedData)
     queue.push(() => {
         request.post(webHookURL,{
         headers: {
@@ -105,7 +106,6 @@ function sendUnfilteredDicordWebhook(embedData) {
       e.avatar_url = unfiltered[i].logo
       e.embeds[0].footer.icon_url = unfiltered[i].logo
       e.embeds[0].color = parseInt(unfiltered[i].color)
-      console.log(e)
       sendDicordWebhook(e, unfiltered[i].webhook)
       
     }
