@@ -115,7 +115,7 @@ class RateLimit {
 
 }
 
-async function enqueue(jobs) {
+async function enqueue(jobs, timeout) {
   let todo = jobs
   let x = new RateLimit(5, 5500)
   while (todo.length > 0) {
@@ -126,13 +126,16 @@ async function enqueue(jobs) {
           {
             try {
               await j()
+              await new Promise(resolve =>
+                setTimeout(resolve, timeout)
+              );
           } catch (error) {
               todo.push(j)
               await new Promise(resolve =>
                 setTimeout(resolve, x.remainingTime)
               );
           }
-          }    
+          }  
       } catch (error) {
         todo.push(j)
         await new Promise(resolve =>

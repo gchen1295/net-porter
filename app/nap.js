@@ -823,7 +823,7 @@ function startmonitor2() {
           }
         }
       }
-      que.enqueue(jobs)
+      que.enqueue(jobs, 1000)
       startmonitor2()
     }
     catch(err)
