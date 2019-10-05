@@ -59,15 +59,15 @@ let unfiltered = []
 // var webHookURL = process.env.WEBHOOK
 var errorHook = process.env.ERRORHOOK
 
-function sendDicordWebhook(embedData, webHookURL) {
+function sendDicordWebhook(emb, webHookURL) {
   try{
-    console.log(embedData)
+    console.log(emb)
     queue.push(() => {
         request.post(webHookURL,{
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(embedData)
+        body: JSON.stringify(emb)
       });
     });
   }
