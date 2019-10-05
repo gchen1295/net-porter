@@ -100,10 +100,11 @@ function sendUnfilteredDicordWebhook(embedData) {
   try{
     for(let i = 0; i < unfiltered.length; ++i)
     {
-      embedData.avatar_url = unfiltered[i].logo
-      console.log(embedData.avatar_url)
-      embedData.embeds[0].footer.icon_url = unfiltered[i].logo
-      embedData.embeds[0].color = parseInt(unfiltered[i].color)
+      let e = embedData
+      e.avatar_url = unfiltered[i].logo
+      e.embeds[0].footer.icon_url = unfiltered[i].logo
+      e.embeds[0].color = parseInt(unfiltered[i].color)
+      console.log(e)
       sendDicordWebhook(embedData, unfiltered[i].webhook)
       
     }
@@ -360,6 +361,7 @@ async function getSizes(productURL, proxy)
     if(opt)
     {
       opt = JSON.parse(opt)
+      
       return opt
     }
     else
@@ -368,14 +370,14 @@ async function getSizes(productURL, proxy)
       let sku = $('input.sku').attr('value')
       if(stock && sku)
       {
-        return {
+        return [{
           stockLevel: stock,
           displaySize: 'One Size',
           id: sku,
           value: sku,
           name: 'One Size ',
           data: { size: 'One Size', stock: stock, moreComingSoon: '' }
-        }
+        }]
       }
       else
       {
