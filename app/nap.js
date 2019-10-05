@@ -25,8 +25,9 @@ Config.watch().on('change', async d=>{
     }
   }
 })
-
-mongoose.connect(`mongodb://127.0.0.1:27017/net-a-porter`, {
+const mongoserver = process.env.MONGO_SERVER
+const db = process.env.MONGO_DB
+mongoose.connect(`mongodb://${mongoserver}/${db}`, {
   useNewUrlParser: true,
   useCreateIndex: true
 }, async (err,cl)=>{
