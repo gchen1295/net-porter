@@ -708,10 +708,13 @@ function startmonitor2() {
             let foundSizes = JSON.parse(JSON.stringify(found.productSizes))
             for(let i in foundSizes)
             {
-              if(foundSizes[i].stockLevel === 'Out_of_Stock' && cleanedProduct.productSizes[i].stockLevel !== 'Out_of_Stock')
+              if(cleanedProduct.productSizes[i])
               {
-                restocked = true
-                break;
+                if(foundSizes[i].stockLevel === 'Out_of_Stock' && cleanedProduct.productSizes[i].stockLevel !== 'Out_of_Stock')
+                {
+                  restocked = true
+                  break;
+                }
               }
             }
             if(restocked)
