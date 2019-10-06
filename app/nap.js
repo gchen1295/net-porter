@@ -699,7 +699,7 @@ function startmonitor2() {
             }
           }
 
-          let cleanedProduct = cleanedProducts[p]
+          let cleanedProduct = JSON.parse(JSON.stringify(cleanedProducts[p]))
           
           if(cleanedProduct)
           {
@@ -711,7 +711,7 @@ function startmonitor2() {
             {
               if(cleanedProduct.productSizes[i] === undefined)
               {
-                console.log(cleanedProduct)
+                console.log(cleanedProduct.productSizes[i])
                 console.log(foundSizes[i])
               }
               if(cleanedProduct.productSizes[i])
