@@ -711,10 +711,8 @@ function startmonitor2() {
             {
               if(cleanedProduct.productSizes[i] === undefined)
               {
-                console.log(`LENGTH: ${cleanedProduct.productSizes.length}`)
-                console.log(`LENGTH: ${foundSizes.length}`)
-                console.log(cleanedProduct.productSizes[i])
-                console.log(foundSizes[i])
+                console.log(cleanedProduct)
+                console.log(foundSizes)
               }
               if(cleanedProduct.productSizes[i])
               {
