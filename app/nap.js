@@ -63,13 +63,12 @@ var errorHook = process.env.ERRORHOOK
 
 function sendDicordWebhook(emb, webHookURL) {
   try{
-    let e = emb
     queue.push(() => {
       request.post(webHookURL,{
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify(e)
+      body: JSON.stringify(emb)
     });
     });
   }
@@ -85,20 +84,12 @@ function sendFilteredDicordWebhook(embedData) {
   try{
       for(let j = 0; j < filtered.length; ++j)
       {
-        let e = embedData
+        let e = _.clone(embedData)
         e.avatar_url = filtered[j].logo
         e.embeds[0].footer.icon_url = filtered[j].logo
         e.embeds[0].color = parseInt(filtered[j].color)
 
-        queue.push(() => {
-          request.post(filtered[j].webhook,{
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(e)
-        });
-      });
-        //sendDicordWebhook(e, filtered[j].webhook)
+        sendDicordWebhook(e, filtered[j].webhook)
       }
   }
   catch(err)
@@ -111,20 +102,12 @@ function sendUnfilteredDicordWebhook(embedData) {
   try{
     for(let i = 0; i < unfiltered.length; ++i)
     {
-      let e = embedData
+      let e = _.clone(embedData)
       e.avatar_url = unfiltered[i].logo
       e.embeds[0].footer.icon_url = unfiltered[i].logo
       e.embeds[0].color = parseInt(unfiltered[i].color)
       
-      queue.push(() => {
-        request.post(unfiltered[i].webhook,{
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(e)
-      });
-    });
-      //sendDicordWebhook(e, unfiltered[i].webhook)
+      sendDicordWebhook(e, unfiltered[i].webhook)
       
     }
   }
@@ -699,7 +682,7 @@ function startmonitor2() {
         cleanedProducts.push(cleanProduct(rawProducts[pr], proxy))
       }
       cleanedProducts = await Promise.all(cleanedProducts)
-      let jobs = []
+      //let jobs = []
       for(let p in rawProducts)
       {
         let found = await Products.findOne({productID: rawProducts[p].id, productName: rawProducts[p].name})
@@ -736,36 +719,36 @@ function startmonitor2() {
               await found.save()
               
               let emb = buildRestocked(cleanedProduct)
-              for(let j = 0; j < unfiltered.length; ++j)
-              {
-                emb.avatar_url = unfiltered[j].logo
-                emb.embeds[0].footer.icon_url = unfiltered[j].logo
-                emb.embeds[0].color = parseInt(unfiltered[j].color)
-                jobs.push(request.post(unfiltered[j].webhook,{
-                  headers: {
-                    'Content-Type': 'application/json'
-                  },
-                  body: JSON.stringify(emb)
-                }))
-              }
-              //await sendUnfilteredDicordWebhook(emb)
+              // for(let j = 0; j < unfiltered.length; ++j)
+              // {
+              //   emb.avatar_url = unfiltered[j].logo
+              //   emb.embeds[0].footer.icon_url = unfiltered[j].logo
+              //   emb.embeds[0].color = parseInt(unfiltered[j].color)
+              //   jobs.push(request.post(unfiltered[j].webhook,{
+              //     headers: {
+              //       'Content-Type': 'application/json'
+              //     },
+              //     body: JSON.stringify(emb)
+              //   }))
+              // }
+              await sendUnfilteredDicordWebhook(emb)
               //process.send({type: 'Restock', source: "Unfiltered" ,data: emb})
               if(isMonitored)
               {
-                for(let i = 0; i < unfiltered.length; ++i)
-                {
-                  emb.avatar_url = unfiltered[i].logo
-                  emb.embeds[0].footer.icon_url = unfiltered[i].logo
-                  emb.embeds[0].color = parseInt(unfiltered[i].color)
-                  jobs.push(request.post(unfiltered[i].webhook,{
-                    headers: {
-                      'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(emb)
-                  }))
-                }
+                // for(let i = 0; i < unfiltered.length; ++i)
+                // {
+                //   emb.avatar_url = unfiltered[i].logo
+                //   emb.embeds[0].footer.icon_url = unfiltered[i].logo
+                //   emb.embeds[0].color = parseInt(unfiltered[i].color)
+                //   jobs.push(request.post(unfiltered[i].webhook,{
+                //     headers: {
+                //       'Content-Type': 'application/json'
+                //     },
+                //     body: JSON.stringify(emb)
+                //   }))
+                // }
                 //process.send({type: 'Restock', source: "Filtered", data: emb})
-                //await sendFilteredDicordWebhook(emb)
+                await sendFilteredDicordWebhook(emb)
               }
             }
           }
@@ -788,42 +771,42 @@ function startmonitor2() {
             await newProduct.save()
             
             let emb = buildNewProduct(cleanedProduct)
-            for(let j = 0; j < unfiltered.length; ++j)
-            {
-              emb.avatar_url = unfiltered[j].logo
-              emb.embeds[0].footer.icon_url = unfiltered[j].logo
-              emb.embeds[0].color = parseInt(unfiltered[j].color)
-              jobs.push(async ()=>( await request.post(unfiltered[j].webhook,{
-                headers: {
-                  'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(emb)
-              })))
-            }
+            // for(let j = 0; j < unfiltered.length; ++j)
+            // {
+            //   emb.avatar_url = unfiltered[j].logo
+            //   emb.embeds[0].footer.icon_url = unfiltered[j].logo
+            //   emb.embeds[0].color = parseInt(unfiltered[j].color)
+            //   jobs.push(async ()=>( await request.post(unfiltered[j].webhook,{
+            //     headers: {
+            //       'Content-Type': 'application/json'
+            //     },
+            //     body: JSON.stringify(emb)
+            //   })))
+            // }
             
-            //await sendUnfilteredDicordWebhook(emb)
+            await sendUnfilteredDicordWebhook(emb)
             //process.send({type: 'Restock', source: "Unfiltered" ,data: emb})
             if(isMonitored)
             {
               //process.send({type: 'Restock', source: "Filtered", data: emb})
-              for(let i = 0; i < unfiltered.length; ++i)
-              {
-                emb.avatar_url = unfiltered[i].logo
-                emb.embeds[0].footer.icon_url = unfiltered[i].logo
-                emb.embeds[0].color = parseInt(unfiltered[i].color)
-                jobs.push(request.post(unfiltered[i].webhook,{
-                  headers: {
-                    'Content-Type': 'application/json'
-                  },
-                  body: JSON.stringify(emb)
-                }))
-              }
-              //await sendFilteredDicordWebhook(emb)
+              // for(let i = 0; i < unfiltered.length; ++i)
+              // {
+              //   emb.avatar_url = unfiltered[i].logo
+              //   emb.embeds[0].footer.icon_url = unfiltered[i].logo
+              //   emb.embeds[0].color = parseInt(unfiltered[i].color)
+              //   jobs.push(request.post(unfiltered[i].webhook,{
+              //     headers: {
+              //       'Content-Type': 'application/json'
+              //     },
+              //     body: JSON.stringify(emb)
+              //   }))
+              // }
+              await sendFilteredDicordWebhook(emb)
             }
           }
         }
       }
-      await que.enqueue(jobs, 1000)
+      // await que.enqueue(jobs, 1000)
       startmonitor2()
     }
     catch(err)
