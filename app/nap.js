@@ -709,7 +709,11 @@ function startmonitor2() {
             
             for(let i in foundSizes)
             {
-              console.log(cleanedProduct)
+              if(cleanedProduct.productSizes[i] === undefined)
+              {
+                console.log(cleanedProduct)
+                console.log(foundSizes[i])
+              }
               if(cleanedProduct.productSizes[i])
               {
                 if(foundSizes[i].stockLevel === 'Out_of_Stock' && cleanedProduct.productSizes[i].stockLevel !== 'Out_of_Stock')
