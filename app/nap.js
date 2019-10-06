@@ -709,19 +709,18 @@ function startmonitor2() {
             
             for(let i in foundSizes)
             {
-              if(cleanedProduct.productSizes[i] === undefined)
+              for(let ci in  cleanedProduct.productSizes)
               {
-                console.log(cleanedProduct)
-                console.log(found)
-              }
-              if(cleanedProduct.productSizes[i])
-              {
-                if(foundSizes[i].stockLevel === 'Out_of_Stock' && cleanedProduct.productSizes[i].stockLevel !== 'Out_of_Stock')
+                if(cleanedProduct.productSizes[ci].sizeName === foundSizes[i].sizeName)
                 {
-                  restocked = true
-                  break;
+                  if(foundSizes[i].stockLevel === 'Out_of_Stock' && cleanedProduct.productSizes[i].stockLevel !== 'Out_of_Stock')
+                  {
+                    restocked = true
+                    break;
+                  }
                 }
               }
+              
             }
             if(restocked)
             {
