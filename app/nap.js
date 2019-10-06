@@ -706,8 +706,10 @@ function startmonitor2() {
             // Check for restocks
             let restocked = false
             let foundSizes = JSON.parse(JSON.stringify(found.productSizes))
+            
             for(let i in foundSizes)
             {
+              console.log(cleanedProduct)
               if(cleanedProduct.productSizes[i])
               {
                 if(foundSizes[i].stockLevel === 'Out_of_Stock' && cleanedProduct.productSizes[i].stockLevel !== 'Out_of_Stock')
