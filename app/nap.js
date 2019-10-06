@@ -5,6 +5,7 @@ const cheerio = require('cheerio')
 const housecall = require("housecall");
 const Products = require('./models/product')
 const Config = require('./models/config')
+let _ = require('lodash');
 let que = require('./queue.js')
 let date = new Date()
 let dateFormat = `${date.getFullYear()}-${date.getDay()}-${date.getMonth() + 1} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`
