@@ -85,7 +85,7 @@ function sendFilteredDicordWebhook(embedData) {
   try{
       for(let j = 0; j < filtered.length; ++j)
       {
-        let e = _.clone(embedData)
+        let e = _.cloneDeep(embedData)
         e.avatar_url = filtered[j].logo
         e.embeds[0].footer.icon_url = filtered[j].logo
         e.embeds[0].color = parseInt(filtered[j].color)
@@ -103,7 +103,7 @@ function sendUnfilteredDicordWebhook(embedData) {
   try{
     for(let i = 0; i < unfiltered.length; ++i)
     {
-      let e = _.clone(embedData)
+      let e = _.cloneDeep(embedData)
       e.avatar_url = unfiltered[i].logo
       e.embeds[0].footer.icon_url = unfiltered[i].logo
       e.embeds[0].color = parseInt(unfiltered[i].color)
