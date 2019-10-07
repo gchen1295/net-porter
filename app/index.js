@@ -117,7 +117,7 @@ bot.on('message', async message => {
         serverInfo.logo = args[1]
         for(let i = 0; i < config.unfiltered.length; i++)
         {
-          if(config.unfiltered[i].webhook === serverInfo.unfilterChannelWH)
+          if(config.unfiltered[i].serverID === serverInfo.serverID)
           {
             config.unfiltered[i].logo = args[1]
             break
@@ -125,7 +125,7 @@ bot.on('message', async message => {
         }
         for(let j = 0; j < config.filtered.length; j++)
         {
-          if(config.filtered[j].webhook === serverInfo.filteredChannelWH)
+          if(config.filtered[j].serverID === serverInfo.serverID)
           {
             config.filtered[j].logo = args[1]
             break
@@ -159,7 +159,7 @@ bot.on('message', async message => {
 
         for(let i = 0; i < config.unfiltered.length; i++)
         {
-          if(config.unfiltered[i].webhook === serverInfo.unfilterChannelWH)
+          if(config.unfiltered[i].serverID === serverInfo.serverID)
           {
             console.log(config.unfiltered[i].webhook)
             config.unfiltered[i].color = serverInfo.color
@@ -168,7 +168,7 @@ bot.on('message', async message => {
         }
         for(let j = 0; j < config.filtered.length; j++)
         {
-          if(config.filtered[j].webhook === serverInfo.filteredChannelWH)
+          if(config.filtered[j].serverID === serverInfo.serverID)
           {
             config.filtered[j].color = serverInfo.color
             break
