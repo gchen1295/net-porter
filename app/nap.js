@@ -722,7 +722,7 @@ function startmonitor2() {
             }
           }
 
-          let cleanedProduct = JSON.parse(JSON.stringify(cleanedProducts[p]))
+          let cleanedProduct = cleanedProducts[p]
           
           if(cleanedProduct)
           {
