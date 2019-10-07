@@ -483,12 +483,12 @@ function buildNewProduct(product)
     if(err.statusCode)
     {
       let e = buildError(`BuildNew GB: ${err.statusCode}\n${productURL}`)
-      await sendErrorWebhook(e)
+      sendErrorWebhook(e)
     }
     else
     {
       let e = buildError(`BuildNew GB: ${err}\n${productURL}`)
-      await sendErrorWebhook(e)
+      sendErrorWebhook(e)
     }
   }
 }

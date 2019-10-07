@@ -480,12 +480,12 @@ function buildNewProduct(product)
     if(err.statusCode)
     {
       let e = buildError(`BuildNew US: ${err.statusCode}`)
-      await sendErrorWebhook(e)
+      sendErrorWebhook(e)
     }
     else
     {
       let e = buildError(`BuildNew US: ${err}`)
-      await sendErrorWebhook(e)
+      sendErrorWebhook(e)
     }
   }
 }
