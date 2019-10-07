@@ -256,11 +256,11 @@ async function getProductsAPI(proxy)
     let agent 
     if(proxyParts[2] && proxyParts[3])
     {
-      agent = "https://" + proxyParts[2] + ':' + proxyParts[3] + '@' + proxyParts[0] + ':' + proxyParts[1]
+      agent = "http://" + proxyParts[2] + ':' + proxyParts[3] + '@' + proxyParts[0] + ':' + proxyParts[1]
     }
     else
     {
-      agent = "https://" + proxyParts[0] + ':' + proxyParts[1]
+      agent = "http://" + proxyParts[0] + ':' + proxyParts[1]
     }
     let res = await request({
       url: 'https://api.net-a-porter.com/NAP/GB/en/1600/0/summaries?brandIds=1051,1212,1840,2606&whatsNew=Now',
@@ -269,8 +269,7 @@ async function getProductsAPI(proxy)
       },
       proxy: agent,
       resolveWithFullResponse: true,
-      followAllRedirects: true,
-      strictSSL: false
+      followAllRedirects: true
     })
     let products = JSON.parse(res.body).summaries
     
@@ -357,11 +356,11 @@ async function getSizes(productURL, proxy)
     let agent 
     if(proxyParts[2] && proxyParts[3])
     {
-      agent = "https://" + proxyParts[2] + ':' + proxyParts[3] + '@' + proxyParts[0] + ':' + proxyParts[1]
+      agent = "http://" + proxyParts[2] + ':' + proxyParts[3] + '@' + proxyParts[0] + ':' + proxyParts[1]
     }
     else
     {
-      agent = "https://" + proxyParts[0] + ':' + proxyParts[1]
+      agent = "http://" + proxyParts[0] + ':' + proxyParts[1]
     }
     let res = await request({
       url: productURL,
@@ -370,8 +369,7 @@ async function getSizes(productURL, proxy)
       },
       proxy: agent,
       resolveWithFullResponse: true,
-      followAllRedirects: true,
-      strictSSL: false
+      followAllRedirects: true
     })
 
     let $ = cheerio.load(res.body)
@@ -597,11 +595,11 @@ async function getAllProductsAPI(proxy)
     let agent 
     if(proxyParts[2] && proxyParts[3])
     {
-      agent = "https://" + proxyParts[2] + ':' + proxyParts[3] + '@' + proxyParts[0] + ':' + proxyParts[1]
+      agent = "http://" + proxyParts[2] + ':' + proxyParts[3] + '@' + proxyParts[0] + ':' + proxyParts[1]
     }
     else
     {
-      agent = "https://" + proxyParts[0] + ':' + proxyParts[1]
+      agent = "http://" + proxyParts[0] + ':' + proxyParts[1]
     }
     
     
@@ -612,8 +610,7 @@ async function getAllProductsAPI(proxy)
       },
       proxy: agent,
       resolveWithFullResponse: true,
-      followAllRedirects: true,
-      strictSSL: false
+      followAllRedirects: true
     })
     let products = JSON.parse(res.body).summaries
     
