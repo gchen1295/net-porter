@@ -703,7 +703,7 @@ function startmonitor2() {
         cleanedProducts.push(cleanProduct(rawProducts[pr], proxy))
       }
       cleanedProducts = await Promise.all(cleanedProducts)
-      //let jobs = []
+      let jobs = []
       for(let p in rawProducts)
       {
         let found = await Products.findOne({productID: rawProducts[p].id, productName: rawProducts[p].name})
