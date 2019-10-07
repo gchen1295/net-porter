@@ -707,9 +707,9 @@ function startmonitor2() {
             let restocked = false
             let foundSizes = JSON.parse(JSON.stringify(found.productSizes))
             
-            for(let i in foundSizes)
+            for(let i = 0; i < foundSizes.length; ++i)
             {
-              for(let ci in  cleanedProduct.productSizes)
+              for(let ci = 0; ci < cleanedProduct.productSizes.length; ++ci)
               {
                 if(cleanedProduct.productSizes[ci].sizeName === foundSizes[i].sizeName)
                 {
