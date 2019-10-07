@@ -127,12 +127,19 @@ function sendUnfilteredDicordWebhook(embedData) {
 function sendErrorWebhook(embedData) {
   try{
       queue.push(() => {
-        request.post(errorHook,{
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(embedData)
-        });
+        try
+        {
+          await request.post(errorHook,{
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(emb)
+          });
+        }
+        catch(err)
+        {
+          sendErrorWebhook(embedData)
+        }
       });
   }
   catch(err)
@@ -273,12 +280,12 @@ async function getProductsAPI(proxy)
     console.log(err)
     if(err.statusCode)
     {
-      let e = buildError(`GetProducts: ${err.statusCode}`)
+      let e = buildError(`GetProducts GB: ${err.statusCode}`)
       await sendErrorWebhook(e)
     }
     else
     {
-      let e = buildError(`GetProducts: ${err}`)
+      let e = buildError(`GetProducts GB: ${err}`)
       await sendErrorWebhook(e)
     }
   }
@@ -329,12 +336,12 @@ async function cleanProduct(product, proxy)
     console.log(err)
     if(err.statusCode)
     {
-      let e = buildError(`CleanProducts: ${err.statusCode}`)
+      let e = buildError(`CleanProducts GB: ${err.statusCode}`)
       await sendErrorWebhook(e)
     }
     else
     {
-      let e = buildError(`CleanProducts: ${err}`)
+      let e = buildError(`CleanProducts GB: ${err}`)
       console.log(e)
       await sendErrorWebhook(e)
     }
@@ -400,12 +407,12 @@ async function getSizes(productURL, proxy)
     console.log(err)
     if(err.statusCode)
     {
-      let e = buildError(`GetSizes: ${err.statusCode}\n${productURL}`)
+      let e = buildError(`GetSizes GB: ${err.statusCode}\n${productURL}`)
       await sendErrorWebhook(e)
     }
     else
     {
-      let e = buildError(`GetSizes: ${err}\n${productURL}`)
+      let e = buildError(`GetSizes GB: ${err}\n${productURL}`)
       await sendErrorWebhook(e)
     }
   }
@@ -473,6 +480,16 @@ function buildNewProduct(product)
   catch(err)
   {
     console.log(err)
+    if(err.statusCode)
+    {
+      let e = buildError(`BuildNew GB: ${err.statusCode}\n${productURL}`)
+      await sendErrorWebhook(e)
+    }
+    else
+    {
+      let e = buildError(`BuildNew GB: ${err}\n${productURL}`)
+      await sendErrorWebhook(e)
+    }
   }
 }
 
@@ -604,12 +621,12 @@ async function getAllProductsAPI(proxy)
     console.log(err)
     if(err.statusCode)
     {
-      let e = buildError(`GetProducts: ${err.statusCode}`)
+      let e = buildError(`GetProducts GB: ${err.statusCode}`)
       await sendErrorWebhook(e)
     }
     else
     {
-      let e = buildError(`GetProducts: ${err}`)
+      let e = buildError(`GetProducts GB: ${err}`)
       await sendErrorWebhook(e)
     }
   }
@@ -829,12 +846,12 @@ function startmonitor2() {
       console.log(err)
       if(err.statusCode)
       {
-        let e = buildError(`Main process: ${err.statusCode}`)
+        let e = buildError(`Main process GB: ${err.statusCode}`)
         await sendErrorWebhook(e)
       }
       else
       {
-        let e = buildError(`Main process: ${err}`)
+        let e = buildError(`Main process GB: ${err}`)
         await sendErrorWebhook(e)
       }
       startmonitor2()
