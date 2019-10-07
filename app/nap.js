@@ -713,7 +713,7 @@ function startmonitor2() {
               {
                 if(cleanedProduct.productSizes[ci].sizeName === foundSizes[i].sizeName)
                 {
-                  if(foundSizes[i].stockLevel === 'Out_of_Stock' && cleanedProduct.productSizes[i].stockLevel !== 'Out_of_Stock')
+                  if(foundSizes[i].stockLevel === 'Out_of_Stock' && cleanedProduct.productSizes[ci].stockLevel !== 'Out_of_Stock')
                   {
                     restocked = true
                     break;
