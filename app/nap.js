@@ -269,7 +269,8 @@ async function getProductsAPI(proxy)
       },
       proxy: agent,
       resolveWithFullResponse: true,
-      followAllRedirects: true
+      followAllRedirects: true,
+      strictSSL: false
     })
     let products = JSON.parse(res.body).summaries
     
@@ -369,7 +370,8 @@ async function getSizes(productURL, proxy)
       },
       proxy: agent,
       resolveWithFullResponse: true,
-      followAllRedirects: true
+      followAllRedirects: true,
+      strictSSL: false
     })
 
     let $ = cheerio.load(res.body)
@@ -610,7 +612,8 @@ async function getAllProductsAPI(proxy)
       },
       proxy: agent,
       resolveWithFullResponse: true,
-      followAllRedirects: true
+      followAllRedirects: true,
+      strictSSL: false
     })
     let products = JSON.parse(res.body).summaries
     
