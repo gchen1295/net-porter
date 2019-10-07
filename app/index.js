@@ -322,7 +322,7 @@ bot.on('message', async message => {
               configIndex = i
             }
           }
-          if(i)
+          if(configIndex)
           {
             config.filtered[configIndex].webhook = filteredGBWebhook
             config.filtered[configIndex].napWebhookUS = filteredUSWebhook
