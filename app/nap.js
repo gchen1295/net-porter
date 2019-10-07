@@ -221,7 +221,7 @@ async function getProducts()
   try
   {
     let res = await request({
-      url: 'https://www.net-a-porter.com/gb/en/d/Shop/Shoes/All?view=partial&cm_sp=topnav-_-shoes-_-allshoes&pn=1&npp=60&image_view=product&dScroll=0&sortorder=new-in',
+      url: 'https://www.net-a-porter.com/GB/en/d/Shop/Shoes/All?view=partial&cm_sp=topnav-_-shoes-_-allshoes&pn=1&npp=60&image_view=product&dScroll=0&sortorder=new-in',
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.90 Safari/537.36'
       },
@@ -301,7 +301,7 @@ async function cleanProduct(product, proxy)
     let brandName = brands[product.brandId]
     let pl = product.name.toLowerCase().split(' ')
     pl = pl.join('-')
-    let pLink = `https://net-a-porter.com/gb/en/product/${productID}/${brandName}/${pl}`
+    let pLink = `https://net-a-porter.com/GB/en/product/${productID}/${brandName}/${pl}`
     pLink = pLink.replace(/\+/g, "-")
     pLink = pLink.normalize("NFD").replace(/[\u0300-\u036f]/g, "")
     let rawSizeData = await getSizes(pLink, proxy)
@@ -310,7 +310,7 @@ async function cleanProduct(product, proxy)
     {
       for(let j in rawSizeData)
       {
-        let atcLink = `https://www.net-a-porter.com/gb/en/api/basket/addskus/${rawSizeData[j].id}.json`
+        let atcLink = `https://www.net-a-porter.com/GB/en/api/basket/addskus/${rawSizeData[j].id}.json`
         cleanSizes.push({
           atcLink,
           stockLevel: rawSizeData[j].stockLevel,
