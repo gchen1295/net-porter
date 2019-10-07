@@ -197,66 +197,156 @@ bot.on('message', async message => {
       //let serverInfo = await Servers.findOne({id: message.guild.id})
       if(serverInfo)
       {
-        if(serverInfo.setupDone) return
+        //if(serverInfo.setupDone) return
         // Set name of footer and guild
         serverInfo.serverName = message.guild.name
+
+        let config = await Config.findOne()
+
         let filterch
         let unfilterch
+        let filterUS
+        let unfilterUS
+
         let uwh
         let fwh
-        if(message.guild.channels.some(channel => channel.name === 'nap-unfiltered'))
+        let usfwh
+        let usuwh
+
+        let filteredGBWebhook
+        let unfilterGBWebhook
+        let filteredUSWebhook
+        let unfilteredUSWebhook
+
+        
+        if(message.guild.channels.some(channel => channel.name === 'nap-gb-unfiltered'))
         {
-          unfilterch = message.guild.channels.find(channel => channel.name === 'nap-unfiltered')
+          unfilterch = message.guild.channels.find(channel => channel.name === 'nap-gb-unfiltered')
           uwh = await unfilterch.fetchWebhooks()
           if(uwh.first() === undefined)
           {
-            uwh = await unfilterch.createWebhook('NAP Unfiltered')
-            serverInfo.unfilterChannelWH = `https://discordapp.com/api/webhooks/${uwh.id}/${uwh.token}`
+            uwh = await unfilterch.createWebhook('NAP GB Unfiltered')
+            unfilterGBWebhook = `https://discordapp.com/api/webhooks/${uwh.id}/${uwh.token}`
           }
           else
           {
-            serverInfo.unfilterChannelWH = `https://discordapp.com/api/webhooks/${uwh.first().id}/${uwh.first().token}`
+            unfilterGBWebhook = `https://discordapp.com/api/webhooks/${uwh.first().id}/${uwh.first().token}`
           }
           await message.channel.send(`Setup <#${unfilterch.id}>`)
         }
         else
         {
-          unfilterch = await message.guild.createChannel('nap-unfiltered',{type: 'text'})
-          uwh = await unfilterch.createWebhook('NAP Unfiltered')
-          serverInfo.unfilterChannelWH = `https://discordapp.com/api/webhooks/${uwh.id}/${uwh.token}`
+          unfilterch = await message.guild.createChannel('nap-gb-unfiltered',{type: 'text'})
+          uwh = await unfilterch.createWebhook('NAP GB Unfiltered')
+          unfilterGBWebhook = `https://discordapp.com/api/webhooks/${uwh.id}/${uwh.token}`
           await message.channel.send(`Created <#${unfilterch.id}>`)
         }
         // Create filtered channel
-        if(message.guild.channels.some(channel => channel.name === 'nap-filtered'))
+        if(message.guild.channels.some(channel => channel.name === 'nap-gb-filtered'))
         {
-          filterch = message.guild.channels.find(channel => channel.name === 'nap-filtered')
+          filterch = message.guild.channels.find(channel => channel.name === 'nap-gb-filtered')
           fwh = await filterch.fetchWebhooks()
           if(fwh.first() === undefined)
           {
-            fwh = await filterch.createWebhook('NAP Filtered')
-            serverInfo.filteredChannelWH = `https://discordapp.com/api/webhooks/${fwh.id}/${fwh.token}`
+            fwh = await filterch.createWebhook('NAP GB Filtered')
+            filteredGBWebhook = `https://discordapp.com/api/webhooks/${fwh.id}/${fwh.token}`
           }
           else
           {
-            serverInfo.filteredChannelWH = `https://discordapp.com/api/webhooks/${fwh.first().id}/${fwh.first().token}`
+            filteredGBWebhook = `https://discordapp.com/api/webhooks/${fwh.first().id}/${fwh.first().token}`
           }
           await message.channel.send(`Setup <#${filterch.id}>`)
         }
         else
         {
-          filterch = await message.guild.createChannel('nap-filtered',{type: 'text'})
+          filterch = await message.guild.createChannel('nap-gb-filtered',{type: 'text'})
           fwh = await filterch.createWebhook('NAP Filtered')
-          serverInfo.filteredChannelWH = `https://discordapp.com/api/webhooks/${fwh.id}/${fwh.token}`
+          filteredGBWebhook = `https://discordapp.com/api/webhooks/${fwh.id}/${fwh.token}`
           await message.channel.send(`Created <#${filterch.id}>`)
         }
+        if(message.guild.channels.some(channel => channel.name === 'nap-us-filtered'))
+        {
+          filterUS = message.guild.channels.find(channel => channel.name === 'nap-us-filtered')
+          usfwh = await filterUS.fetchWebhooks()
+          if(usfwh.first() === undefined)
+          {
+            usfwh = await filterUS.createWebhook('NAP US Filtered')
+            filteredUSWebhook = `https://discordapp.com/api/webhooks/${usfwh.id}/${usfwh.token}`
+          }
+          else
+          {
+            filteredUSWebhook = `https://discordapp.com/api/webhooks/${usfwh.first().id}/${usfwh.first().token}`
+          }
+          await message.channel.send(`Setup <#${filterUS.id}>`)
+        }
+        else
+        {
+          filterUS = await message.guild.createChannel('nap-us-filtered',{type: 'text'})
+          usfwh = await filterUS.createWebhook('NAP Filtered')
+          filteredUSWebhook = `https://discordapp.com/api/webhooks/${usfwh.id}/${usfwh.token}`
+          await message.channel.send(`Created <#${filterUS.id}>`)
+        }
+
+        if(message.guild.channels.some(channel => channel.name === 'nap-us-unfiltered'))
+        {
+          unfilterUS = message.guild.channels.find(channel => channel.name === 'nap-us-unfiltered')
+          usuwh = await unfilterUS.fetchWebhooks()
+          if(usuwh.first() === undefined)
+          {
+            usuwh = await unfilterUS.createWebhook('NAP US Unfiltered')
+            unfilteredUSWebhook = `https://discordapp.com/api/webhooks/${usuwh.id}/${usuwh.token}`
+          }
+          else
+          {
+            unfilteredUSWebhook = `https://discordapp.com/api/webhooks/${usuwh.first().id}/${usuwh.first().token}`
+          }
+          await message.channel.send(`Setup <#${unfilterUS.id}>`)
+        }
+        else
+        {
+          unfilterUS = await message.guild.createChannel('nap-us-unfiltered',{type: 'text'})
+          usuwh = await unfilterUS.createWebhook('NAP Filtered')
+          unfilteredUSWebhook = `https://discordapp.com/api/webhooks/${usuwh.id}/${usuwh.token}`
+          await message.channel.send(`Created <#${unfilterUS.id}>`)
+        }
         
-        serverInfo.unfilterChannel = unfilterch.id
-        serverInfo.filteredChannel = filterch.id
-        let config = await Config.findOne()
+ 
+        
         if(config)
         {
-          config.filtered.push({color: 16753920, logo: 'https://cdn.discordapp.com/icons/613371089158012938/1fd21f22b481124632a7149a4434a851.png?size=128', webhook: serverInfo.filteredChannelWH})
-          config.unfiltered.push({color: 16753920, logo: 'https://cdn.discordapp.com/icons/613371089158012938/1fd21f22b481124632a7149a4434a851.png?size=128', webhook: serverInfo.unfilterChannelWH})
+          let configIndex
+          for(let i = 0; i < config.filtered.length; ++i)
+          {
+            if(config.filtered[i].serverID === message.guild.id)
+            {
+              configIndex = i
+            }
+          }
+          if(i)
+          {
+            config.filtered[configIndex].webhook = filteredGBWebhook
+            config.filtered[configIndex].napWebhookUS = filteredUSWebhook
+
+            config.unfiltered[configIndex].webhook = unfilterGBWebhook
+            config.unfiltered[configIndex].napWebhookUS = unfilteredUSWebhook
+          }
+          else
+          {
+            config.filtered.push({
+              serverID: serverInfo.serverID,
+              color: 16753920, 
+              logo: 'https://cdn.discordapp.com/icons/613371089158012938/1fd21f22b481124632a7149a4434a851.png?size=128', 
+              webhook: filteredGBWebhook,
+              napWebhookUS: filteredUSWebhook
+            })
+            config.unfiltered.push({
+              serverID: serverInfo.serverID,
+              color: 16753920, 
+              logo: 'https://cdn.discordapp.com/icons/613371089158012938/1fd21f22b481124632a7149a4434a851.png?size=128', 
+              webhook: unfilterGBWebhook,
+              napWebhookUS: unfilteredUSWebhook
+            })
+          }
           await config.save()
         }
         else
@@ -264,12 +354,23 @@ bot.on('message', async message => {
           let newConfig = new Config({
             proxies: [],
             keywords: [],
-            filtered: [{color: 16753920, logo: 'https://cdn.discordapp.com/icons/613371089158012938/1fd21f22b481124632a7149a4434a851.png?size=128', webhook: serverInfo.filteredChannelWH}],
-            unfiltered: [{color: 16753920, logo: 'https://cdn.discordapp.com/icons/613371089158012938/1fd21f22b481124632a7149a4434a851.png?size=128', webhook: serverInfo.unfilterChannelWH}]
+            filtered: [{
+              serverID: serverInfo.serverID,
+              color: 16753920, 
+              logo: 'https://cdn.discordapp.com/icons/613371089158012938/1fd21f22b481124632a7149a4434a851.png?size=128', 
+              webhook: filteredGBWebhook,
+              napWebhookUS: filteredUSWebhook
+            }],
+            unfiltered: [{
+              serverID: serverInfo.serverID,
+              color: 16753920, 
+              logo: 'https://cdn.discordapp.com/icons/613371089158012938/1fd21f22b481124632a7149a4434a851.png?size=128', 
+              webhook: unfilterGBWebhook,
+              napWebhookUS: unfilteredUSWebhook
+            }]
           })
           await newConfig.save()
         }
-        serverInfo.setupDone = true
         await serverInfo.save()
       }
       else

@@ -27,6 +27,7 @@ Config.watch().on('change', async d=>{
     }
   }
 })
+
 const mongoserver = process.env.MONGO_SERVER
 const db = process.env.MONGO_DB
 mongoose.connect(`mongodb://${mongoserver}/${db}`, {
@@ -64,19 +65,24 @@ var errorHook = process.env.ERRORHOOK
 
 function sendDicordWebhook(emb, webHookURL) {
   try{
-    queue.push(() => {
-      request.post(webHookURL,{
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(emb)
-    });
-    });
+    queue.push(async () => {
+      try
+      {
+        await request.post(webHookURL,{
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(emb)
+        });
+      }
+      catch(err)
+      {
+        sendDicordWebhook(emb, webHookURL)
+      }
+    })
   }
   catch(err)
   {
-    console.log(webHookURL)
-    console.log(embedData)
     console.log(err)
   }
 }
@@ -581,7 +587,7 @@ async function getAllProductsAPI(proxy)
     
     
     let res = await request({
-      url: 'https://api.net-a-porter.com/NAP/US/en/1600/0/summaries?brandIds=1051,1212,1840,2606',
+      url: 'https://api.net-a-porter.com/NAP/GB/en/1600/0/summaries?brandIds=1051,1212,1840,2606',
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.90 Safari/537.36'
       },

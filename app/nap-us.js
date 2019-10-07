@@ -3,8 +3,10 @@ const request = require('request-promise')
 const mongoose = require('mongoose')
 const cheerio = require('cheerio')
 const housecall = require("housecall");
-const Products = require('./models/product')
+const Products = require('./models/productUS')
 const Config = require('./models/config')
+let _ = require('lodash');
+let que = require('./queue.js')
 let date = new Date()
 let dateFormat = `${date.getFullYear()}-${date.getDay()}-${date.getMonth() + 1} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`
 let queue = housecall({
@@ -25,6 +27,7 @@ Config.watch().on('change', async d=>{
     }
   }
 })
+
 const mongoserver = process.env.MONGO_SERVER
 const db = process.env.MONGO_DB
 mongoose.connect(`mongodb://${mongoserver}/${db}`, {
@@ -44,6 +47,7 @@ mongoose.connect(`mongodb://${mongoserver}/${db}`, {
 })
 mongoose.Promise = global.Promise;
 
+
 let brands = {
   '1840': 'adidas_originals',
   '1051': 'nike',
@@ -56,24 +60,28 @@ let proxies = []
 let filtered = []
 let unfiltered = []
 
-// var webHookURL = process.env.WEBHOOK
 var errorHook = process.env.ERRORHOOK
 
-function sendDicordWebhook(embedData, webHookURL) {
+function sendDicordWebhook(emb, webHookURL) {
   try{
-    queue.push(() => {
-        request.post(webHookURL,{
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(embedData)
-      });
-    });
+    queue.push(async () => {
+      try
+      {
+        await request.post(webHookURL,{
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(emb)
+        });
+      }
+      catch(err)
+      {
+        sendDicordWebhook(emb, webHookURL)
+      }
+    })
   }
   catch(err)
   {
-    console.log(webHookURL)
-    console.log(embedData)
     console.log(err)
   }
 }
@@ -82,11 +90,12 @@ function sendFilteredDicordWebhook(embedData) {
   try{
       for(let j = 0; j < filtered.length; ++j)
       {
-        embedData.avatar_url = filtered[j].logo
-        embedData.embeds[0].footer.icon_url = filtered[j].logo
-        embedData.embeds[0].color = parseInt(filtered[j].color)
-        console.log(embedData.avatar_url)
-        sendDicordWebhook(embedData, filtered[j].webhook)
+        let e = _.cloneDeep(embedData)
+        e.avatar_url = filtered[j].logo
+        e.embeds[0].footer.icon_url = filtered[j].logo
+        e.embeds[0].color = parseInt(filtered[j].color)
+
+        sendDicordWebhook(e, filtered[j].napWebhookUS)
       }
   }
   catch(err)
@@ -99,11 +108,12 @@ function sendUnfilteredDicordWebhook(embedData) {
   try{
     for(let i = 0; i < unfiltered.length; ++i)
     {
-      embedData.avatar_url = unfiltered[i].logo
-      console.log(embedData.avatar_url)
-      embedData.embeds[0].footer.icon_url = unfiltered[i].logo
-      embedData.embeds[0].color = parseInt(unfiltered[i].color)
-      sendDicordWebhook(embedData, unfiltered[i].webhook)
+      let e = _.cloneDeep(embedData)
+      e.avatar_url = unfiltered[i].logo
+      e.embeds[0].footer.icon_url = unfiltered[i].logo
+      e.embeds[0].color = parseInt(unfiltered[i].color)
+      
+      sendDicordWebhook(e, unfiltered[i].napWebhookUS)
       
     }
   }
@@ -359,6 +369,7 @@ async function getSizes(productURL, proxy)
     if(opt)
     {
       opt = JSON.parse(opt)
+      
       return opt
     }
     else
@@ -367,14 +378,14 @@ async function getSizes(productURL, proxy)
       let sku = $('input.sku').attr('value')
       if(stock && sku)
       {
-        return {
+        return [{
           stockLevel: stock,
           displaySize: 'One Size',
           id: sku,
           value: sku,
           name: 'One Size ',
           data: { size: 'One Size', stock: stock, moreComingSoon: '' }
-        }
+        }]
       }
       else
       {
@@ -575,7 +586,7 @@ async function getAllProductsAPI(proxy)
     
     
     let res = await request({
-      url: 'https://api.net-a-porter.com/NAP/US/en/1600/0/summaries?brandIds=1051,1212,1840,2606',
+      url: 'https://api.net-a-porter.com/NAP/GB/en/1600/0/summaries?brandIds=1051,1212,1840,2606',
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.90 Safari/537.36'
       },
@@ -677,6 +688,7 @@ function startmonitor2() {
         cleanedProducts.push(cleanProduct(rawProducts[pr], proxy))
       }
       cleanedProducts = await Promise.all(cleanedProducts)
+      //let jobs = []
       for(let p in rawProducts)
       {
         let found = await Products.findOne({productID: rawProducts[p].id, productName: rawProducts[p].name})
@@ -692,20 +704,28 @@ function startmonitor2() {
             }
           }
 
-          let cleanedProduct = cleanedProducts[p]
+          let cleanedProduct = JSON.parse(JSON.stringify(cleanedProducts[p]))
           
           if(cleanedProduct)
           {
             // Check for restocks
             let restocked = false
             let foundSizes = JSON.parse(JSON.stringify(found.productSizes))
-            for(let i in foundSizes)
+            
+            for(let i = 0; i < foundSizes.length; ++i)
             {
-              if(foundSizes[i].stockLevel === 'Out_of_Stock' && cleanedProduct.productSizes[i].stockLevel !== 'Out_of_Stock')
+              for(let ci = 0; ci < cleanedProduct.productSizes.length; ++ci)
               {
-                restocked = true
-                break;
+                if(cleanedProduct.productSizes[ci].sizeName === foundSizes[i].sizeName)
+                {
+                  if(foundSizes[i].stockLevel === 'Out_of_Stock' && cleanedProduct.productSizes[ci].stockLevel !== 'Out_of_Stock')
+                  {
+                    restocked = true
+                    break;
+                  }
+                }
               }
+              
             }
             if(restocked)
             {
@@ -713,10 +733,34 @@ function startmonitor2() {
               await found.save()
               
               let emb = buildRestocked(cleanedProduct)
+              // for(let j = 0; j < unfiltered.length; ++j)
+              // {
+              //   emb.avatar_url = unfiltered[j].logo
+              //   emb.embeds[0].footer.icon_url = unfiltered[j].logo
+              //   emb.embeds[0].color = parseInt(unfiltered[j].color)
+              //   jobs.push(request.post(unfiltered[j].napWebhookUS,{
+              //     headers: {
+              //       'Content-Type': 'application/json'
+              //     },
+              //     body: JSON.stringify(emb)
+              //   }))
+              // }
               await sendUnfilteredDicordWebhook(emb)
               //process.send({type: 'Restock', source: "Unfiltered" ,data: emb})
               if(isMonitored)
               {
+                // for(let i = 0; i < unfiltered.length; ++i)
+                // {
+                //   emb.avatar_url = unfiltered[i].logo
+                //   emb.embeds[0].footer.icon_url = unfiltered[i].logo
+                //   emb.embeds[0].color = parseInt(unfiltered[i].color)
+                //   jobs.push(request.post(unfiltered[i].napWebhookUS,{
+                //     headers: {
+                //       'Content-Type': 'application/json'
+                //     },
+                //     body: JSON.stringify(emb)
+                //   }))
+                // }
                 //process.send({type: 'Restock', source: "Filtered", data: emb})
                 await sendFilteredDicordWebhook(emb)
               }
@@ -740,17 +784,43 @@ function startmonitor2() {
             let newProduct = new Products(cleanedProduct)
             await newProduct.save()
             
-            let emb = buildNewProduct(cleanedProduct) 
+            let emb = buildNewProduct(cleanedProduct)
+            // for(let j = 0; j < unfiltered.length; ++j)
+            // {
+            //   emb.avatar_url = unfiltered[j].logo
+            //   emb.embeds[0].footer.icon_url = unfiltered[j].logo
+            //   emb.embeds[0].color = parseInt(unfiltered[j].color)
+            //   jobs.push(async ()=>( await request.post(unfiltered[j].napWebhookUS,{
+            //     headers: {
+            //       'Content-Type': 'application/json'
+            //     },
+            //     body: JSON.stringify(emb)
+            //   })))
+            // }
+            
             await sendUnfilteredDicordWebhook(emb)
             //process.send({type: 'Restock', source: "Unfiltered" ,data: emb})
             if(isMonitored)
             {
               //process.send({type: 'Restock', source: "Filtered", data: emb})
+              // for(let i = 0; i < unfiltered.length; ++i)
+              // {
+              //   emb.avatar_url = unfiltered[i].logo
+              //   emb.embeds[0].footer.icon_url = unfiltered[i].logo
+              //   emb.embeds[0].color = parseInt(unfiltered[i].color)
+              //   jobs.push(request.post(unfiltered[i].napWebhookUS,{
+              //     headers: {
+              //       'Content-Type': 'application/json'
+              //     },
+              //     body: JSON.stringify(emb)
+              //   }))
+              // }
               await sendFilteredDicordWebhook(emb)
             }
           }
         }
       }
+      // await que.enqueue(jobs, 1000)
       startmonitor2()
     }
     catch(err)

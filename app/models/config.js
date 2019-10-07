@@ -4,12 +4,16 @@ let configSchema = mongoose.Schema({
   keywords: [String],
   proxies: [String],
   filtered: [{
+    serverID: String,
     webhook: String,
+    napWebhookUS: String,
     logo: String,
     color: String
   }],
   unfiltered: [{
+    serverID: String,
     webhook: String,
+    napWebhookUS: String,
     logo: String,
     color: String
   }],
