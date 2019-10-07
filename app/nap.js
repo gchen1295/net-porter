@@ -842,7 +842,7 @@ function startmonitor2() {
           }
         }
       }
-      // await que.enqueue(jobs, 1000)
+      await que.enqueue(jobs, 1000)
       startmonitor2()
     }
     catch(err)
