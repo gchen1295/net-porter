@@ -11,7 +11,7 @@ let date = new Date()
 let dateFormat = `${date.getFullYear()}-${date.getDay()}-${date.getMonth() + 1} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`
 let queue = housecall({
   concurrency: 1,
-  cooldown: 750
+  cooldown: 1100
 });
 
 Config.watch().on('change', async d=>{
@@ -748,36 +748,38 @@ function startmonitor2() {
               await found.save()
               
               let emb = buildRestocked(cleanedProduct)
-              // for(let j = 0; j < unfiltered.length; ++j)
-              // {
-              //   emb.avatar_url = unfiltered[j].logo
-              //   emb.embeds[0].footer.icon_url = unfiltered[j].logo
-              //   emb.embeds[0].color = parseInt(unfiltered[j].color)
-              //   jobs.push(request.post(unfiltered[j].napWebhookUS,{
-              //     headers: {
-              //       'Content-Type': 'application/json'
-              //     },
-              //     body: JSON.stringify(emb)
-              //   }))
-              // }
-              await sendUnfilteredDicordWebhook(emb)
+              for(let j = 0; j < unfiltered.length; ++j)
+              {
+                let e = _.cloneDeep(emb)
+                e.avatar_url = unfiltered[j].logo
+                e.embeds[0].footer.icon_url = unfiltered[j].logo
+                e.embeds[0].color = parseInt(unfiltered[j].color)
+                jobs.push(request.post(unfiltered[j].napWebhookUS,{
+                  headers: {
+                    'Content-Type': 'application/json'
+                  },
+                  body: JSON.stringify(e)
+                }))
+              }
+              //await sendUnfilteredDicordWebhook(emb)
               //process.send({type: 'Restock', source: "Unfiltered" ,data: emb})
               if(isMonitored)
               {
-                // for(let i = 0; i < unfiltered.length; ++i)
-                // {
-                //   emb.avatar_url = unfiltered[i].logo
-                //   emb.embeds[0].footer.icon_url = unfiltered[i].logo
-                //   emb.embeds[0].color = parseInt(unfiltered[i].color)
-                //   jobs.push(request.post(unfiltered[i].napWebhookUS,{
-                //     headers: {
-                //       'Content-Type': 'application/json'
-                //     },
-                //     body: JSON.stringify(emb)
-                //   }))
-                // }
+                for(let i = 0; i < unfiltered.length; ++i)
+                {
+                  let e = _.cloneDeep(emb)
+                  e.avatar_url = unfiltered[i].logo
+                  e.embeds[0].footer.icon_url = unfiltered[i].logo
+                  e.embeds[0].color = parseInt(unfiltered[i].color)
+                  jobs.push(request.post(unfiltered[i].napWebhookUS,{
+                    headers: {
+                      'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(e)
+                  }))
+                }
                 //process.send({type: 'Restock', source: "Filtered", data: emb})
-                await sendFilteredDicordWebhook(emb)
+                // await sendFilteredDicordWebhook(emb)
               }
             }
           }
@@ -800,42 +802,44 @@ function startmonitor2() {
             await newProduct.save()
             
             let emb = buildNewProduct(cleanedProduct)
-            // for(let j = 0; j < unfiltered.length; ++j)
-            // {
-            //   emb.avatar_url = unfiltered[j].logo
-            //   emb.embeds[0].footer.icon_url = unfiltered[j].logo
-            //   emb.embeds[0].color = parseInt(unfiltered[j].color)
-            //   jobs.push(async ()=>( await request.post(unfiltered[j].napWebhookUS,{
-            //     headers: {
-            //       'Content-Type': 'application/json'
-            //     },
-            //     body: JSON.stringify(emb)
-            //   })))
-            // }
+            for(let j = 0; j < unfiltered.length; ++j)
+            {
+              let e = _.cloneDeep(emb)
+              e.avatar_url = unfiltered[j].logo
+              e.embeds[0].footer.icon_url = unfiltered[j].logo
+              e.embeds[0].color = parseInt(unfiltered[j].color)
+              jobs.push(async ()=>( await request.post(unfiltered[j].napWebhookUS,{
+                headers: {
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(e)
+              })))
+            }
             
-            await sendUnfilteredDicordWebhook(emb)
+            // await sendUnfilteredDicordWebhook(emb)
             //process.send({type: 'Restock', source: "Unfiltered" ,data: emb})
             if(isMonitored)
             {
-              //process.send({type: 'Restock', source: "Filtered", data: emb})
-              // for(let i = 0; i < unfiltered.length; ++i)
-              // {
-              //   emb.avatar_url = unfiltered[i].logo
-              //   emb.embeds[0].footer.icon_url = unfiltered[i].logo
-              //   emb.embeds[0].color = parseInt(unfiltered[i].color)
-              //   jobs.push(request.post(unfiltered[i].napWebhookUS,{
-              //     headers: {
-              //       'Content-Type': 'application/json'
-              //     },
-              //     body: JSON.stringify(emb)
-              //   }))
-              // }
-              await sendFilteredDicordWebhook(emb)
+              process.send({type: 'Restock', source: "Filtered", data: emb})
+              for(let i = 0; i < unfiltered.length; ++i)
+              {
+                let e = _.cloneDeep(emb)
+                e.avatar_url = unfiltered[i].logo
+                e.embeds[0].footer.icon_url = unfiltered[i].logo
+                e.embeds[0].color = parseInt(unfiltered[i].color)
+                jobs.push(request.post(unfiltered[i].napWebhookUS,{
+                  headers: {
+                    'Content-Type': 'application/json'
+                  },
+                  body: JSON.stringify(e)
+                }))
+              }
+              //await sendFilteredDicordWebhook(emb)
             }
           }
         }
       }
-      // await que.enqueue(jobs, 1000)
+      await que.enqueue(jobs, 1000)
       startmonitor2()
     }
     catch(err)
