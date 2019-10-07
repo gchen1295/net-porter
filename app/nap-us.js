@@ -254,11 +254,11 @@ async function getProductsAPI(proxy)
     let agent 
     if(proxyParts[2] && proxyParts[3])
     {
-      agent = "http://" + proxyParts[2] + ':' + proxyParts[3] + '@' + proxyParts[0] + ':' + proxyParts[1]
+      agent = "https://" + proxyParts[2] + ':' + proxyParts[3] + '@' + proxyParts[0] + ':' + proxyParts[1]
     }
     else
     {
-      agent = "http://" + proxyParts[0] + ':' + proxyParts[1]
+      agent = "https://" + proxyParts[0] + ':' + proxyParts[1]
     }
     let res = await request({
       url: 'https://api.net-a-porter.com/NAP/US/en/1600/0/summaries?brandIds=1051,1212,1840,2606&whatsNew=Now',
@@ -353,11 +353,11 @@ async function getSizes(productURL, proxy)
     let agent 
     if(proxyParts[2] && proxyParts[3])
     {
-      agent = "http://" + proxyParts[2] + ':' + proxyParts[3] + '@' + proxyParts[0] + ':' + proxyParts[1]
+      agent = "https://" + proxyParts[2] + ':' + proxyParts[3] + '@' + proxyParts[0] + ':' + proxyParts[1]
     }
     else
     {
-      agent = "http://" + proxyParts[0] + ':' + proxyParts[1]
+      agent = "https://" + proxyParts[0] + ':' + proxyParts[1]
     }
     let res = await request({
       url: productURL,
@@ -592,11 +592,11 @@ async function getAllProductsAPI(proxy)
     let agent 
     if(proxyParts[2] && proxyParts[3])
     {
-      agent = "http://" + proxyParts[2] + ':' + proxyParts[3] + '@' + proxyParts[0] + ':' + proxyParts[1]
+      agent = "https://" + proxyParts[2] + ':' + proxyParts[3] + '@' + proxyParts[0] + ':' + proxyParts[1]
     }
     else
     {
-      agent = "http://" + proxyParts[0] + ':' + proxyParts[1]
+      agent = "https://" + proxyParts[0] + ':' + proxyParts[1]
     }
     
     
