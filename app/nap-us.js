@@ -125,7 +125,7 @@ function sendUnfilteredDicordWebhook(embedData) {
 
 function sendErrorWebhook(embedData) {
   try{
-      queue.push(() => {
+      queue.push(async () => {
         try
         {
           await request.post(errorHook,{
