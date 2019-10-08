@@ -400,13 +400,14 @@ async function getSizes(productURL, proxy)
   }
   catch(err)
   {
-    if(proxies.length === 0)
-    {
-      return undefined
-    }
-    let proxy = proxies.shift()
-    proxies.push(proxy)
-    await getSizes(productURL, proxy)
+    // if(proxies.length === 0)
+    // {
+    //   return undefined
+    // }
+    // let proxy = proxies.shift()
+    // proxies.push(proxy)
+    // await getSizes(productURL, proxy)
+    console.log(err)
     if(err.statusCode)
     {
       let e = buildError(`GetSizes US: ${err.statusCode}\n${productURL}`)
