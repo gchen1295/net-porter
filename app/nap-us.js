@@ -1,5 +1,6 @@
 require('dotenv').config()
 const request = require('request-promise')
+const Promise = require('bluebird')
 const mongoose = require('mongoose')
 const cheerio = require('cheerio')
 const housecall = require("housecall");
@@ -708,7 +709,7 @@ function startmonitor2() {
         currPlist.push(proxy)
         cleanedProducts.push(cleanProduct(rawProducts[pr], proxy))
       }
-      cleanedProducts = await Promise.all(cleanedProducts)
+      cleanedProducts = Promise.map(cleanedProducts,(p)=>{return p}, {concurrency: 100})
       let jobs = []
       for(let p in rawProducts)
       {
