@@ -709,7 +709,7 @@ function startmonitor2() {
         currPlist.push(proxy)
         cleanedProducts.push(cleanProduct(rawProducts[pr], proxy))
       }
-      cleanedProducts = Promise.map(cleanedProducts,(p)=>{return p}, {concurrency: 25})
+      cleanedProducts = Promise.map(cleanedProducts,(p)=>{return p}, {concurrency: 100})
       let jobs = []
       for(let p in rawProducts)
       {
