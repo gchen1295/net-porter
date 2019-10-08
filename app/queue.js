@@ -143,6 +143,7 @@ async function enqueue(jobs, timeout) {
           setTimeout(resolve, x.remainingTime)
         );
         enqueue(todo, timeout)
+        break
         //console.log(error)
       }
   }
