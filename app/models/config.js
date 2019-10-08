@@ -8,14 +8,16 @@ let configSchema = mongoose.Schema({
     webhook: String,
     napWebhookUS: String,
     logo: String,
-    color: String
+    color: String,
+    footer: String,
   }],
   unfiltered: [{
     serverID: String,
     webhook: String,
     napWebhookUS: String,
     logo: String,
-    color: String
+    color: String,
+    footer: String,
   }],
 })
 //new Date(+new Date() + 30*24*60*60*1000)

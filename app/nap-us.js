@@ -759,6 +759,7 @@ function startmonitor2() {
                 e.avatar_url = unfiltered[j].logo
                 e.embeds[0].footer.icon_url = unfiltered[j].logo
                 e.embeds[0].color = parseInt(unfiltered[j].color)
+                e.embeds[0].footer.text = unfiltered[j].footer
                 jobs.push(request.post(unfiltered[j].napWebhookUS,{
                   headers: {
                     'Content-Type': 'application/json'
@@ -770,13 +771,14 @@ function startmonitor2() {
               //process.send({type: 'Restock', source: "Unfiltered" ,data: emb})
               if(isMonitored)
               {
-                for(let i = 0; i < unfiltered.length; ++i)
+                for(let i = 0; i < filtered.length; ++i)
                 {
                   let e = _.cloneDeep(emb)
-                  e.avatar_url = unfiltered[i].logo
-                  e.embeds[0].footer.icon_url = unfiltered[i].logo
-                  e.embeds[0].color = parseInt(unfiltered[i].color)
-                  jobs.push(request.post(unfiltered[i].napWebhookUS,{
+                  e.avatar_url = filtered[i].logo
+                  e.embeds[0].footer.icon_url = filtered[i].logo
+                  e.embeds[0].footer.text = filtered[j].footer
+                  e.embeds[0].color = parseInt(filtered[i].color)
+                  jobs.push(request.post(filtered[i].napWebhookUS,{
                     headers: {
                       'Content-Type': 'application/json'
                     },
@@ -813,6 +815,7 @@ function startmonitor2() {
               e.avatar_url = unfiltered[j].logo
               e.embeds[0].footer.icon_url = unfiltered[j].logo
               e.embeds[0].color = parseInt(unfiltered[j].color)
+              e.embeds[0].footer.text = unfiltered[j].footer
               jobs.push(async ()=>( await request.post(unfiltered[j].napWebhookUS,{
                 headers: {
                   'Content-Type': 'application/json'
@@ -826,13 +829,14 @@ function startmonitor2() {
             if(isMonitored)
             {
               process.send({type: 'Restock', source: "Filtered", data: emb})
-              for(let i = 0; i < unfiltered.length; ++i)
+              for(let i = 0; i < filtered.length; ++i)
               {
                 let e = _.cloneDeep(emb)
-                e.avatar_url = unfiltered[i].logo
-                e.embeds[0].footer.icon_url = unfiltered[i].logo
-                e.embeds[0].color = parseInt(unfiltered[i].color)
-                jobs.push(request.post(unfiltered[i].napWebhookUS,{
+                e.avatar_url = filtered[i].logo
+                e.embeds[0].footer.icon_url = filtered[i].logo
+                e.embeds[0].color = parseInt(filtered[i].color)
+                e.embeds[0].footer.text = filtered[j].footer
+                jobs.push(request.post(filtered[i].napWebhookUS,{
                   headers: {
                     'Content-Type': 'application/json'
                   },

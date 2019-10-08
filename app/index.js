@@ -192,6 +192,49 @@ bot.on('message', async message => {
       }
       return
     }
+    if(cmd === 'setfooter' && message.channel.type !== 'dm')
+    {
+      //let serverInfo = await Servers.findOne({id: message.guild.id})
+      if(serverInfo)
+      {
+        if(args[1] === undefined) return
+        let config = await Config.findOne()
+
+        for(let i = 0; i < config.unfiltered.length; i++)
+        {
+          if(config.unfiltered[i].serverID === serverInfo.serverID)
+          {
+            config.unfiltered[i].footer = args[1]
+            break
+          }
+        }
+        for(let j = 0; j < config.filtered.length; j++)
+        {
+          if(config.filtered[j].serverID === serverInfo.serverID)
+          {
+            config.filtered[j].footer = args[1]
+            break
+          }
+        }
+        await config.save()
+        await message.channel.send({embed: {
+          title: "Footer text set!",
+          color: parseInt(serverInfo.color),
+          footer: {
+            text: "~Woof~#1001"
+          }
+        }})
+        await serverInfo.save()
+      }
+      else
+      {
+        await message.channel.send({embed: {
+          title: "Server Not Authorized!",
+          description: `Please authorize ${message.guild.id}`
+        }})
+      }
+      return
+    }
     if(cmd === 'setup' && message.channel.type !== 'dm')
     {
       //let serverInfo = await Servers.findOne({id: message.guild.id})
@@ -335,14 +378,16 @@ bot.on('message', async message => {
             config.filtered.push({
               serverID: serverInfo.serverID,
               color: 16753920, 
-              logo: 'https://cdn.discordapp.com/icons/613371089158012938/1fd21f22b481124632a7149a4434a851.png?size=128', 
+              logo: 'https://cdn.discordapp.com/icons/613371089158012938/1fd21f22b481124632a7149a4434a851.png?size=128',
+              footer: '~Woof~#1001', 
               webhook: filteredGBWebhook,
               napWebhookUS: filteredUSWebhook
             })
             config.unfiltered.push({
               serverID: serverInfo.serverID,
               color: 16753920, 
-              logo: 'https://cdn.discordapp.com/icons/613371089158012938/1fd21f22b481124632a7149a4434a851.png?size=128', 
+              logo: 'https://cdn.discordapp.com/icons/613371089158012938/1fd21f22b481124632a7149a4434a851.png?size=128',
+              footer: '~Woof~#1001', 
               webhook: unfilterGBWebhook,
               napWebhookUS: unfilteredUSWebhook
             })
@@ -357,14 +402,16 @@ bot.on('message', async message => {
             filtered: [{
               serverID: serverInfo.serverID,
               color: 16753920, 
-              logo: 'https://cdn.discordapp.com/icons/613371089158012938/1fd21f22b481124632a7149a4434a851.png?size=128', 
+              logo: 'https://cdn.discordapp.com/icons/613371089158012938/1fd21f22b481124632a7149a4434a851.png?size=128',
+              footer: '~Woof~#1001',
               webhook: filteredGBWebhook,
               napWebhookUS: filteredUSWebhook
             }],
             unfiltered: [{
               serverID: serverInfo.serverID,
               color: 16753920, 
-              logo: 'https://cdn.discordapp.com/icons/613371089158012938/1fd21f22b481124632a7149a4434a851.png?size=128', 
+              logo: 'https://cdn.discordapp.com/icons/613371089158012938/1fd21f22b481124632a7149a4434a851.png?size=128',
+              footer: '~Woof~#1001',
               webhook: unfilterGBWebhook,
               napWebhookUS: unfilteredUSWebhook
             }]
