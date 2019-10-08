@@ -1,13 +1,13 @@
 {
   "name": "monitor",
   "version": "1.0.0",
-  "description": "monitor template",
+  "description": "Monitors galore",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "npm install && node index.js"
+    "start": "npm install && node index.js && node nap.js && node nap-us.js"
   },
-  "author": "incizzle",
+  "author": "woof",
   "license": "ISC",
   "dependencies": {
     "bluebird": "^3.7.0",
