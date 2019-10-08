@@ -199,12 +199,13 @@ bot.on('message', async message => {
       {
         if(args[1] === undefined) return
         let config = await Config.findOne()
-
+        args.shift()
+        let footext = args.join(' ')
         for(let i = 0; i < config.unfiltered.length; i++)
         {
           if(config.unfiltered[i].serverID === serverInfo.serverID)
           {
-            config.unfiltered[i].footer = args[1]
+            config.unfiltered[i].footer = footext
             break
           }
         }
@@ -212,7 +213,7 @@ bot.on('message', async message => {
         {
           if(config.filtered[j].serverID === serverInfo.serverID)
           {
-            config.filtered[j].footer = args[1]
+            config.filtered[j].footer = footext
             break
           }
         }
@@ -221,7 +222,7 @@ bot.on('message', async message => {
           title: "Footer text set!",
           color: parseInt(serverInfo.color),
           footer: {
-            text: args[1]
+            text: footext
           }
         }})
         await serverInfo.save()
