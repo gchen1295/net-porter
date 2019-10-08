@@ -221,7 +221,7 @@ bot.on('message', async message => {
           title: "Footer text set!",
           color: parseInt(serverInfo.color),
           footer: {
-            text: "~Woof~#1001"
+            text: args[1]
           }
         }})
         await serverInfo.save()
