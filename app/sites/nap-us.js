@@ -696,6 +696,7 @@ function startmonitor2() {
               }
               if(!rawProducts[i].name.toLowerCase().includes(kw))
               {
+                console.log(rawProducts[i].name.toLowerCase())
                 matchesAll = false;
               }
             }
@@ -718,7 +719,6 @@ function startmonitor2() {
           }
         }
       }
-      console.log(matchedProducts)
       let cleanedProducts = []
       for(let pr in rawProducts)
       {
