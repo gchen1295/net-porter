@@ -713,6 +713,7 @@ function startmonitor2() {
           }
         }
       }
+      console.log(matchedProducts)
       let cleanedProducts = []
       for(let pr in rawProducts)
       {
@@ -736,7 +737,6 @@ function startmonitor2() {
               isMonitored = true
             }
           }
-          console.log(isMonitored)
           let cleanedProduct = cleanedProducts[p]
           if(cleanedProduct)
           {
