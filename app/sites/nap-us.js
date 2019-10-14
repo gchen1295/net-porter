@@ -314,7 +314,7 @@ async function cleanProduct(product, proxy)
     {
       for(let j in rawSizeData)
       {
-        let atcLink = `https://www.net-a-porter.com/us/en/api/basket/addskus/${rawSizeData[j].id}.json`
+        let atcLink = `https://atc.chewy.xyz/napgb?sku=${rawSizeData[j].id}`//`https://www.net-a-porter.com/us/en/api/basket/addskus/${rawSizeData[j].id}.json`
         cleanSizes.push({
           atcLink,
           stockLevel: rawSizeData[j].stockLevel,
