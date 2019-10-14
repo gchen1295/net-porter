@@ -304,7 +304,6 @@ async function cleanProduct(product, proxy)
     let image = `https://cache.net-a-porter.com/images/products/${productID}/${productID}_in_pp.jpg`
     let brandName = brands[product.brandId]
     let pl = product.name.toLowerCase().split(' ')
-    console.log(pl)
     pl = pl.join('-')
     let pLink = `https://net-a-porter.com/US/en/product/${productID}/${brandName}/${pl}`
     pLink = pLink.replace(/\+/g, "-")
@@ -662,7 +661,6 @@ function startmonitor2() {
       proxies.push(proxy)
       console.log(proxy)
       let rawProducts = await getAllProductsAPI(proxy)
-      console.log(rawProducts)
       let matchedProducts = []
       //let cleaned = await cleanProduct(p[i], '')
 
@@ -770,6 +768,7 @@ function startmonitor2() {
               let emb = buildRestocked(cleanedProduct)
               for(let j = 0; j < unfiltered.length; ++j)
               {
+                console.log(emb)
                 let e = _.cloneDeep(emb)
                 e.avatar_url = unfiltered[j].logo
                 e.embeds[0].footer.icon_url = unfiltered[j].logo
@@ -826,6 +825,7 @@ function startmonitor2() {
             let emb = buildNewProduct(cleanedProduct)
             for(let j = 0; j < unfiltered.length; ++j)
             {
+              console.log(emb)
               let e = _.cloneDeep(emb)
               e.avatar_url = unfiltered[j].logo
               e.embeds[0].footer.icon_url = unfiltered[j].logo
