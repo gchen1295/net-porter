@@ -690,7 +690,10 @@ function startmonitor2() {
             for(let l in pkw)
             {
               let kw = pkw[l].toLowerCase();
-              console.log(rawProducts[i].name.toLowerCase())
+              if(rawProducts[i].name.toLowerCase().includes(kw))
+              {
+                console.log(rawProducts[i].name.toLowerCase())
+              }
               if(!rawProducts[i].name.toLowerCase().includes(kw))
               {
                 matchesAll = false;
