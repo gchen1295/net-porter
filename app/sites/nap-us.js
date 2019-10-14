@@ -738,7 +738,7 @@ function startmonitor2() {
           }
 
           let cleanedProduct = cleanedProducts[p]
-          
+          console.log(cleanedProduct)
           if(cleanedProduct)
           {
             // Check for restocks
