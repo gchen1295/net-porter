@@ -684,12 +684,13 @@ function startmonitor2() {
             }
             
           }
-          console.log(pkw)
+          
           for(let i in rawProducts)
           {
             for(let l in pkw)
             {
               let kw = pkw[l].toLowerCase();
+              console.log(rawProducts[i].name.toLowerCase())
               if(!rawProducts[i].name.toLowerCase().includes(kw))
               {
                 matchesAll = false;
