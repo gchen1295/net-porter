@@ -720,7 +720,7 @@ function startmonitor2() {
         currPlist.push(proxy)
         cleanedProducts.push(cleanProduct(rawProducts[pr], proxy))
       }
-      cleanedProducts = Promise.map(cleanedProducts,(p)=>{return p}, {concurrency: 10})
+      cleanedProducts = await Promise.map(cleanedProducts,(p)=>{return p}, {concurrency: 10})
       let jobs = []
       for(let p in rawProducts)
       {
@@ -738,7 +738,6 @@ function startmonitor2() {
           }
 
           let cleanedProduct = cleanedProducts[p]
-          console.log(cleanedProduct)
           if(cleanedProduct)
           {
             // Check for restocks
@@ -768,7 +767,6 @@ function startmonitor2() {
               let emb = buildRestocked(cleanedProduct)
               for(let j = 0; j < unfiltered.length; ++j)
               {
-                console.log(emb)
                 let e = _.cloneDeep(emb)
                 e.avatar_url = unfiltered[j].logo
                 e.embeds[0].footer.icon_url = unfiltered[j].logo
@@ -825,7 +823,6 @@ function startmonitor2() {
             let emb = buildNewProduct(cleanedProduct)
             for(let j = 0; j < unfiltered.length; ++j)
             {
-              console.log(emb)
               let e = _.cloneDeep(emb)
               e.avatar_url = unfiltered[j].logo
               e.embeds[0].footer.icon_url = unfiltered[j].logo
