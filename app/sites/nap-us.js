@@ -701,6 +701,7 @@ function startmonitor2() {
             }
             if(matchesAll)
             {
+              console.log(rawProducts[i])
               matchedProducts.push(rawProducts[i])
             }
           }
