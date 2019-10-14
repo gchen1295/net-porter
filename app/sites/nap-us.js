@@ -736,7 +736,7 @@ function startmonitor2() {
               isMonitored = true
             }
           }
-
+          console.log(isMonitored)
           let cleanedProduct = cleanedProducts[p]
           if(cleanedProduct)
           {
