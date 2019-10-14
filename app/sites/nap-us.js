@@ -1,4 +1,4 @@
-require('dotenv').config("../.env")
+require('dotenv').config({path: __dirname + '/../.env'})
 const request = require('request-promise')
 const Promise = require('bluebird')
 const mongoose = require('mongoose')

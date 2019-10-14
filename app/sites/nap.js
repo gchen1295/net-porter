@@ -1,4 +1,4 @@
-require('dotenv').config('../.env')
+require('dotenv').config({path: __dirname + '/../.env'})
 const request = require('request-promise')
 let Promise = require("bluebird");
 const mongoose = require('mongoose')
@@ -21,7 +21,11 @@ mongoose.connect(`mongodb://${mongoserver}/${db}`, {
   useNewUrlParser: true,
   useCreateIndex: true
 }, async (err,cl)=>{
-  if(err) return
+  if(err)
+  {
+    console.log(err)
+    return
+  } 
   let config = await Config.findOne()
   if(config)
   {
