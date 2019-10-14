@@ -684,7 +684,7 @@ function startmonitor2() {
             }
             
           }
-          
+          console.log(pkw)
           for(let i in rawProducts)
           {
             for(let l in pkw)
@@ -696,13 +696,11 @@ function startmonitor2() {
               }
               if(!rawProducts[i].name.toLowerCase().includes(kw))
               {
-                console.log(rawProducts[i].name.toLowerCase())
                 matchesAll = false;
               }
             }
             if(matchesAll)
             {
-              console.log(rawProducts[i])
               matchedProducts.push(rawProducts[i])
             }
           }
