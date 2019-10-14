@@ -877,7 +877,3 @@ function startmonitor2() {
     }
   }, 1500 )
 }
-
-/etc/letsencrypt/live/atc.chewy.xyz/fullchain.pem
-
-/etc/letsencrypt/live/atc.chewy.xyz/privkey.pem
