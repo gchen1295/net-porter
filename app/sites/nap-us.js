@@ -684,7 +684,7 @@ function startmonitor2() {
             }
             
           }
-          
+          console.log(pkw)
           for(let i in rawProducts)
           {
             for(let l in pkw)
