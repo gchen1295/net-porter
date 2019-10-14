@@ -225,7 +225,7 @@ async function getProducts()
   try
   {
     let res = await request({
-      url: 'https://www.net-a-porter.com/US/en/d/Shop/Shoes/All?view=partial&cm_sp=topnav-_-shoes-_-allshoes&pn=1&npp=60&image_view=product&dScroll=0&sortorder=new-in',
+      url: 'https://www.net-a-porter.com/us/en/d/Shop/Shoes/All?view=partial&cm_sp=topnav-_-shoes-_-allshoes&pn=1&npp=60&image_view=product&dScroll=0&sortorder=new-in',
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.90 Safari/537.36'
       },
@@ -267,7 +267,7 @@ async function getProductsAPI(proxy)
       agent = "http://" + proxyParts[0] + ':' + proxyParts[1]
     }
     let res = await request({
-      url: 'https://api.net-a-porter.com/NAP/US/en/1600/0/summaries?brandIds=1051,1212,1840,2606&whatsNew=Now',
+      url: 'https://api.net-a-porter.com/NAP/US/en/1600/0/summaries?brandIds=1051,1212,1840,2606', //&whatsNew=Now
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.90 Safari/537.36'
       },
