@@ -694,6 +694,7 @@ function startmonitor2() {
               {
                 console.log(rawProducts[i].name.toLowerCase())
               }
+              console.log(!rawProducts[i].name.toLowerCase().includes(kw))
               if(!rawProducts[i].name.toLowerCase().includes(kw))
               {
                 matchesAll = false;
