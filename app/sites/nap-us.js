@@ -4,10 +4,10 @@ const Promise = require('bluebird')
 const mongoose = require('mongoose')
 const cheerio = require('cheerio')
 const housecall = require("housecall");
-const Products = require('./models/productUS')
-const Config = require('./models/config')
+const Products = require('../models/productUS')
+const Config = require('../models/config')
 let _ = require('lodash');
-let que = require('./queue.js')
+let que = require('../queue.js')
 let date = new Date()
 let dateFormat = `${date.getFullYear()}-${date.getDay()}-${date.getMonth() + 1} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`
 let queue = housecall({
@@ -15,19 +15,7 @@ let queue = housecall({
   cooldown: 1100
 });
 
-Config.watch().on('change', async d=>{
-  if(d.operationType === 'update')
-  {
-    let config = await Config.findOne()
-    if(config)
-    {
-      kwSets = config.keywords
-      proxies = config.proxies
-      filtered = config.filtered
-      unfiltered = config.unfiltered
-    }
-  }
-})
+
 
 const mongoserver = process.env.MONGO_SERVER
 const db = process.env.MONGO_DB
@@ -45,6 +33,19 @@ mongoose.connect(`mongodb://${mongoserver}/${db}`, {
     unfiltered = config.unfiltered
     await startmonitor2()
   }
+  Config.watch().on('change', async d=>{
+    if(d.operationType === 'update')
+    {
+      let config = await Config.findOne()
+      if(config)
+      {
+        kwSets = config.keywords
+        proxies = config.proxies
+        filtered = config.filtered
+        unfiltered = config.unfiltered
+      }
+    }
+  })
 })
 mongoose.Promise = global.Promise;
 
@@ -309,7 +310,7 @@ async function cleanProduct(product, proxy)
     {
       for(let j in rawSizeData)
       {
-        let atcLink = `https://www.net-a-porter.com/US/en/api/basket/addskus/${rawSizeData[j].id}.json`
+        let atcLink = `https://www.net-a-porter.com/us/en/api/basket/addskus/${rawSizeData[j].id}.json`
         cleanSizes.push({
           atcLink,
           stockLevel: rawSizeData[j].stockLevel,
@@ -537,13 +538,19 @@ function buildRestocked(product)
       if(limit < 900)
       {
         limit += f.length
-        sizeFields.push(f)
-        stockFields.push(product.productSizes[i].stockLevel)
+        if(product.productSizes[i].stockLevel !== "Out_of_Stock")
+        {
+          sizeFields.push(f)
+          stockFields.push(product.productSizes[i].stockLevel)
+        }
       }
       else
       {
-        sizeFields2.push(f)
-        stockFields2.push(product.productSizes[i].stockLevel)
+        if(product.productSizes[i].stockLevel !== "Out_of_Stock")
+        {
+          sizeFields.push(f)
+          stockFields.push(product.productSizes[i].stockLevel)
+        }
       }
     }
 
@@ -870,3 +877,7 @@ function startmonitor2() {
     }
   }, 1500 )
 }
+
+/etc/letsencrypt/live/atc.chewy.xyz/fullchain.pem
+
+/etc/letsencrypt/live/atc.chewy.xyz/privkey.pem
