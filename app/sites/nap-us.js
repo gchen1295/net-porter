@@ -710,10 +710,10 @@ function startmonitor2() {
                 matchedProducts.splice(a, 1);
               }
             }
-          }
-          console.log(matchedProducts)
+          } 
         }
       }
+
       let cleanedProducts = []
       for(let pr in rawProducts)
       {
@@ -723,6 +723,7 @@ function startmonitor2() {
       }
       cleanedProducts = await Promise.map(cleanedProducts,(p)=>{return p}, {concurrency: 10})
       let jobs = []
+      console.log(matchedProducts)
       for(let p in rawProducts)
       {
         let found = await Products.findOne({productID: rawProducts[p].id, productName: rawProducts[p].name})
