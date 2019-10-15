@@ -723,7 +723,7 @@ function startmonitor2() {
       }
       cleanedProducts = await Promise.map(cleanedProducts,(p)=>{return p}, {concurrency: 10})
       let jobs = []
-      console.log(matchedProducts)
+      
       for(let p in rawProducts)
       {
         let found = await Products.findOne({productID: rawProducts[p].id, productName: rawProducts[p].name})
@@ -733,8 +733,10 @@ function startmonitor2() {
           let isMonitored = false
           for(let j in matchedProducts)
           {
+            console.log(matchedProducts[j].name)
             if(matchedProducts[j].name === found.productName)
             {
+              console.log("Here")
               isMonitored = true
             }
           }
