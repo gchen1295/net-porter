@@ -733,10 +733,8 @@ function startmonitor2() {
           let isMonitored = false
           for(let j in matchedProducts)
           {
-            console.log(matchedProducts[j].name)
             if(matchedProducts[j].name === found.productName)
             {
-              console.log("Here")
               isMonitored = true
             }
           }
@@ -850,7 +848,7 @@ function startmonitor2() {
                 e.avatar_url = filtered[i].logo
                 e.embeds[0].footer.icon_url = filtered[i].logo
                 e.embeds[0].color = parseInt(filtered[i].color)
-                e.embeds[0].footer.text = filtered[j].footer
+                e.embeds[0].footer.text = filtered[i].footer
                 jobs.push(request.post(filtered[i].napWebhookUS,{
                   headers: {
                     'Content-Type': 'application/json'
