@@ -683,7 +683,6 @@ function startmonitor2() {
             }
             
           }
-          console.log(pkw)
           for(let i in rawProducts)
           {
             let matchesAll = true;
@@ -701,7 +700,6 @@ function startmonitor2() {
               matchedProducts.push(rawProducts[i])
             }
           }
-          console.log(nkw)
           for(let a in matchedProducts)
           {
             for(let b in nkw)
@@ -713,6 +711,7 @@ function startmonitor2() {
               }
             }
           }
+          console(matchedProducts)
         }
       }
       let cleanedProducts = []
