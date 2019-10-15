@@ -711,7 +711,7 @@ function startmonitor2() {
               }
             }
           }
-          console(matchedProducts)
+          console.log(matchedProducts)
         }
       }
       let cleanedProducts = []
