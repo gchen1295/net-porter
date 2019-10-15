@@ -671,7 +671,6 @@ function startmonitor2() {
           let kws = kwSets[j].split(',')
           let pkw = []
           let nkw = []
-          let matchesAll = true;
           for(let k in kws)
           {
             if(kws[k].substring(0,1) === '+')
@@ -687,6 +686,7 @@ function startmonitor2() {
           console.log(pkw)
           for(let i in rawProducts)
           {
+            let matchesAll = true;
             for(let l in pkw)
             {
               let kw = pkw[l].toLowerCase();
@@ -704,6 +704,7 @@ function startmonitor2() {
             if(matchesAll)
             {
               matchedProducts.push(rawProducts[i])
+                console.log(matchedProducts)
             }
           }
           for(let a in matchedProducts)
