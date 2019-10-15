@@ -690,11 +690,6 @@ function startmonitor2() {
             for(let l in pkw)
             {
               let kw = pkw[l].toLowerCase();
-              if(rawProducts[i].name.toLowerCase().includes(kw))
-              {
-                console.log(rawProducts[i].name.toLowerCase())
-                console.log(!rawProducts[i].name.toLowerCase().includes(kw))
-              }
               
               if(!rawProducts[i].name.toLowerCase().includes(kw))
               {
@@ -704,9 +699,9 @@ function startmonitor2() {
             if(matchesAll)
             {
               matchedProducts.push(rawProducts[i])
-                console.log(matchedProducts)
             }
           }
+          console.log(nkw)
           for(let a in matchedProducts)
           {
             for(let b in nkw)
