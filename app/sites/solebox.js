@@ -14,7 +14,7 @@ let queue = housecall({
   cooldown: 1100
 });
 
-
+var errorHook = process.env.ERRORHOOK
 const mongoserver = process.env.MONGO_SERVER
 const db = process.env.MONGO_DB
 mongoose.connect(`mongodb://${mongoserver}/${db}`, {
