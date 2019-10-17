@@ -1,4 +1,4 @@
-require('dotenv').config()
+require('dotenv').config({path: __dirname + '/../.env'})
 const request = require('request-promise')
 let Promise = require("bluebird");
 const mongoose = require('mongoose')
@@ -8,7 +8,6 @@ const Config = require('../models/config')
 let _ = require('lodash');
 let que = require('../queue.js')
 let date = new Date()
-const util = require('util')
 
 
 const mongoserver = process.env.MONGO_SERVER
