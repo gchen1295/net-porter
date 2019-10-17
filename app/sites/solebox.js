@@ -91,6 +91,16 @@ try
 catch(err)
 {
   console.log(err.statusCode)
+  if(err.statusCode)
+  {
+    let e = buildError(`GetProducts Solebox: ${err.statusCode}\n${productURL}`)
+    sendErrorWebhook(e)
+  }
+  else
+  {
+    let e = buildError(`GetProducts Solebox: ${err}\n${productURL}`)
+    sendErrorWebhook(e)
+  }
 }
 }
 
@@ -130,6 +140,16 @@ async function getProductSizes(productLink, pxCookie, proxy){
   catch(err)
   {
     console.log(err)
+    if(err.statusCode)
+    {
+      let e = buildError(`GetSize Solebox: ${err.statusCode}\n${productURL}`)
+      sendErrorWebhook(e)
+    }
+    else
+    {
+      let e = buildError(`GetSize Solebox: ${err}\n${productURL}`)
+      sendErrorWebhook(e)
+    }
   }
 }
 
