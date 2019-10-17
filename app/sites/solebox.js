@@ -172,6 +172,7 @@ function sendErrorWebhook(embedData) {
         }
         catch(err)
         {
+          console.log(err)
           sendErrorWebhook(embedData)
         }
       });
