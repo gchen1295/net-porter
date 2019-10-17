@@ -251,16 +251,19 @@ bot.on('message', async message => {
         let unfilterch
         let filterUS
         let unfilterUS
+        let solebox
 
         let uwh
         let fwh
         let usfwh
         let usuwh
+        let soleboxwh
 
         let filteredGBWebhook
         let unfilterGBWebhook
         let filteredUSWebhook
         let unfilteredUSWebhook
+        let soleboxWebhook
 
         
         if(message.guild.channels.some(channel => channel.name === 'nap-gb-unfiltered'))
@@ -353,7 +356,29 @@ bot.on('message', async message => {
           unfilteredUSWebhook = `https://discordapp.com/api/webhooks/${usuwh.id}/${usuwh.token}`
           await message.channel.send(`Created <#${unfilterUS.id}>`)
         }
-        
+
+        if(message.guild.channels.some(channel => channel.name === 'solebox'))
+        {
+          solebox = message.guild.channels.find(channel => channel.name === 'solebox')
+          soleboxwh = await solebox.fetchWebhooks()
+          if(soleboxwh.first() === undefined)
+          {
+            soleboxwh = await solebox.createWebhook('Solebox')
+            soleboxWebhook = `https://discordapp.com/api/webhooks/${soleboxwh.id}/${soleboxwh.token}`
+          }
+          else
+          {
+            soleboxWebhook = `https://discordapp.com/api/webhooks/${soleboxwh.first().id}/${soleboxwh.first().token}`
+          }
+          await message.channel.send(`Setup <#${solebox.id}>`)
+        }
+        else
+        {
+          solebox = await message.guild.createChannel('solebox',{type: 'text'})
+          soleboxwh = await solebox.createWebhook('Solebox')
+          soleboxWebhook = `https://discordapp.com/api/webhooks/${soleboxwh.id}/${soleboxwh.token}`
+          await message.channel.send(`Created <#${solebox.id}>`)
+        }
  
         
         if(config)
@@ -373,6 +398,8 @@ bot.on('message', async message => {
 
             config.unfiltered[configIndex].webhook = unfilterGBWebhook
             config.unfiltered[configIndex].napWebhookUS = unfilteredUSWebhook
+
+            config.filtered[configIndex].sbWebhook = soleboxWebhook
           }
           else
           {
@@ -382,7 +409,8 @@ bot.on('message', async message => {
               logo: 'https://cdn.discordapp.com/icons/613371089158012938/1fd21f22b481124632a7149a4434a851.png?size=128',
               footer: '~Woof~#1001', 
               webhook: filteredGBWebhook,
-              napWebhookUS: filteredUSWebhook
+              napWebhookUS: filteredUSWebhook,
+              sbWebhook: soleboxWebhook
             })
             config.unfiltered.push({
               serverID: serverInfo.serverID,
@@ -390,7 +418,8 @@ bot.on('message', async message => {
               logo: 'https://cdn.discordapp.com/icons/613371089158012938/1fd21f22b481124632a7149a4434a851.png?size=128',
               footer: '~Woof~#1001', 
               webhook: unfilterGBWebhook,
-              napWebhookUS: unfilteredUSWebhook
+              napWebhookUS: unfilteredUSWebhook,
+              sbWebhook: soleboxWebhook
             })
           }
           await config.save()
@@ -672,7 +701,37 @@ bot.on('message', async message => {
       }
       return
     }
-
+    if(cmd === 'setpx3')
+    {
+      let config = await Config.findOne()
+      if(config)
+      {
+        if(args[1] === undefined)
+        {
+          await message.channel.send({embed: {
+            title: "Invalid!",
+            description: `Please provide a valid perimeterX cookie!`
+          }})
+        }
+        else
+        {
+          config.px3Cookie = args[1]
+          await config.save()
+          await message.channel.send({embed: {
+            title: "PerimeterX Cookie Set!",
+            description: `${args[1]}`
+          }})
+        }
+      }
+      else
+      {
+        await message.channel.send({embed: {
+          title: "No configuration found!",
+          description: `Please configure by setting up a server!`
+        }})
+      }
+      return
+    }
 
     
     // if(cmd === 'start' && message.channel.type !== 'dm')
