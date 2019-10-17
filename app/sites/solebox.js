@@ -415,6 +415,7 @@ function startmonitor() {
             {
               // Send a notification
               let emb = buildRestocked(bareProducts[i])
+              console.log(e.embeds[0].fields)
               for(let j = 0; j < unfiltered.length; ++j)
               {
                 if(unfiltered[j].sbWebhook)
