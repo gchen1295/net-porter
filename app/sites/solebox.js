@@ -130,7 +130,7 @@ async function getProductSizes(productLink, pxCookie, proxy){
     let $ = cheerio.load(p.body)
     let sizes = []
     $('div.size').each((i,e)=>{
-      let sizeName = $(e).find('a').attr('data-size-eu')
+      let sizeName = $(e).find('a').attr('data-size-original')
       let pid = $(e).find('a').attr('id')
       //let atcLink = `https://www.solebox.com/index.php?aproducts%5B0%5D%5Bam%5D=1&fnc=changebasket&cl=basket&aproducts%5B0%5D%5Baid%5D=${pid}`
       sizes.push({sizeName, pid})
