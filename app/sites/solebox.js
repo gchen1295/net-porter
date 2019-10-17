@@ -5,9 +5,14 @@ const mongoose = require('mongoose')
 const cheerio = require('cheerio')
 const Products = require('../models/soleProduct')
 const Config = require('../models/config')
+const housecall = require("housecall");
 let _ = require('lodash');
 let que = require('../queue.js')
 let date = new Date()
+let queue = housecall({
+  concurrency: 1,
+  cooldown: 1100
+});
 
 
 const mongoserver = process.env.MONGO_SERVER
