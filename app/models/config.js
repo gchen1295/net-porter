@@ -3,7 +3,7 @@ const mongoose = require('mongoose')
 let configSchema = mongoose.Schema({
   keywords: [String],
   proxies: [String],
-  px3Cookie: String,
+  px3Cookie: [String],
   filtered: [{
     serverID: String,
     webhook: String,

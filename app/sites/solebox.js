@@ -59,11 +59,13 @@ let filtered = []
 let unfiltered = []
 let px3Cookie
 
-async function getProducts(pxCookie, proxy){
+async function getProducts(proxy){
 try
 {
   let proxyParts = proxy.split(':')
-  let agent 
+  let agent
+  let pxCookie = px3Cookie[0]
+  if(pxCookie === undefined) return
   if(proxyParts[2] && proxyParts[3])
   {
     agent = "http://" + proxyParts[2] + ':' + proxyParts[3] + '@' + proxyParts[0] + ':' + proxyParts[1]
@@ -95,6 +97,7 @@ try
 }
 catch(err)
 {
+  px3Cookie.shift()
   console.log(err.statusCode)
   if(err.statusCode)
   {
@@ -109,11 +112,13 @@ catch(err)
 }
 }
 
-async function getProductSizes(productLink, pxCookie, proxy){
+async function getProductSizes(productLink, proxy){
   try
   {
     let proxyParts = proxy.split(':')
     let agent 
+    let pxCookie = px3Cookie[0]
+    if(pxCookie === undefined) return
     if(proxyParts[2] && proxyParts[3])
     {
       agent = "http://" + proxyParts[2] + ':' + proxyParts[3] + '@' + proxyParts[0] + ':' + proxyParts[1]
@@ -144,7 +149,7 @@ async function getProductSizes(productLink, pxCookie, proxy){
   }
   catch(err)
   {
-    console.log(err)
+    px3Cookie.shift()
     if(err.statusCode)
     {
       let e = buildError(`GetSize Solebox: ${err.statusCode}\n${productURL}`)
@@ -154,6 +159,10 @@ async function getProductSizes(productLink, pxCookie, proxy){
     {
       let e = buildError(`GetSize Solebox: ${err}\n${productURL}`)
       sendErrorWebhook(e)
+    }
+    if(px3Cookie.length > 0)
+    {
+      getProductSizes(productLink, proxy)
     }
   }
 }
@@ -341,7 +350,7 @@ function buildRestocked(product)
 function startmonitor() {
   setTimeout(async function () {
     try{
-      if(px3Cookie === undefined)
+      if(px3Cookie.length === 0)
       {
         console.log("No PX3 Cookie!")
         return
@@ -357,13 +366,15 @@ function startmonitor() {
       proxies.push(proxy)
       console.log(proxy)
       // Find new products
-      let bareProducts = await getProducts(px3Cookie, proxy)
+      let bareProducts = await getProducts(proxy)
       // If new product find sizes and push notification
         // Go through database and check if its in database
         // If not we save
         // If it is we check if its a filtered product
           // If it is a filtered we check for restocks
       let jobs = []
+      if(bareProducts)
+      {
       for(let i in bareProducts)
       {
         proxy = currPlist.shift()
@@ -421,7 +432,7 @@ function startmonitor() {
           }
           if(isMatch)
           {
-            let sizes = await getProductSizes(bareProducts[i].productLink, px3Cookie ,proxy)
+            let sizes = await getProductSizes(bareProducts[i].productLink ,proxy)
             bareProducts[i].productSizes = sizes
             // Compare current sizes with found sizes
             let oldSizes = []
@@ -441,7 +452,6 @@ function startmonitor() {
             {
               // Send a notification
               let emb = buildRestocked(bareProducts[i])
-              console.log(e.embeds[0].fields)
               for(let j = 0; j < unfiltered.length; ++j)
               {
                 if(unfiltered[j].sbWebhook)
@@ -475,7 +485,7 @@ function startmonitor() {
         {
           
           // Get sizes and save
-          let sizes = await getProductSizes(bareProducts[i].productLink, px3Cookie, proxy)
+          let sizes = await getProductSizes(bareProducts[i].productLink, proxy)
           bareProducts[i].productSizes = sizes
           if(bareProducts[i].productSizes.length > 0)
           {
@@ -511,6 +521,7 @@ function startmonitor() {
           //await new Promise(resolve => setTimeout(resolve, 5000));
         }
       }
+    }
       //await que.enqueue(jobs, 1000)
       startmonitor()
     }

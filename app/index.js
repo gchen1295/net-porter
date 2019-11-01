@@ -429,6 +429,7 @@ bot.on('message', async message => {
           let newConfig = new Config({
             proxies: [],
             keywords: [],
+            px3Cookie: [],
             filtered: [{
               serverID: serverInfo.serverID,
               color: 16753920, 
@@ -701,37 +702,37 @@ bot.on('message', async message => {
       }
       return
     }
-    if(cmd === 'setpx3')
-    {
-      let config = await Config.findOne()
-      if(config)
-      {
-        if(args[1] === undefined)
-        {
-          await message.channel.send({embed: {
-            title: "Invalid!",
-            description: `Please provide a valid perimeterX cookie!`
-          }})
-        }
-        else
-        {
-          config.px3Cookie = args[1]
-          await config.save()
-          await message.channel.send({embed: {
-            title: "PerimeterX Cookie Set!",
-            description: `${args[1]}`
-          }})
-        }
-      }
-      else
-      {
-        await message.channel.send({embed: {
-          title: "No configuration found!",
-          description: `Please configure by setting up a server!`
-        }})
-      }
-      return
-    }
+    // if(cmd === 'setpx3')
+    // {
+    //   let config = await Config.findOne()
+    //   if(config)
+    //   {
+    //     if(args[1] === undefined)
+    //     {
+    //       await message.channel.send({embed: {
+    //         title: "Invalid!",
+    //         description: `Please provide a valid perimeterX cookie!`
+    //       }})
+    //     }
+    //     else
+    //     {
+    //       config.px3Cookie = [args[1]]
+    //       await config.save()
+    //       await message.channel.send({embed: {
+    //         title: "PerimeterX Cookie Set!",
+    //         description: `${args[1]}`
+    //       }})
+    //     }
+    //   }
+    //   else
+    //   {
+    //     await message.channel.send({embed: {
+    //       title: "No configuration found!",
+    //       description: `Please configure by setting up a server!`
+    //     }})
+    //   }
+    //   return
+    // }
 
     
     // if(cmd === 'start' && message.channel.type !== 'dm')
