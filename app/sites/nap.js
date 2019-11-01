@@ -469,19 +469,13 @@ function buildNewProduct(product)
       if(limit < 850)
       {
         limit += f.length
-        if(product.productSizes[i].stockLevel !== "Out_of_Stock")
-        {
-          sizeFields.push(f)
-          stockFields.push(product.productSizes[i].stockLevel)
-        }
+        sizeFields.push(f)
+        stockFields.push(product.productSizes[i].stockLevel)
       }
       else
       {
-        if(product.productSizes[i].stockLevel !== "Out_of_Stock")
-        {
-          sizeFields.push(f)
-          stockFields.push(product.productSizes[i].stockLevel)
-        }
+        sizeFields.push(f)
+        stockFields.push(product.productSizes[i].stockLevel)
       }
     }
 
