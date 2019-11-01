@@ -130,6 +130,7 @@ async function enqueue(jobs, timeout) {
               //   setTimeout(resolve, timeout)
               // );
           } catch (error) {
+              console.log(error)
               todo.push(j)
               await new Promise(resolve =>
                 setTimeout(resolve, x.remainingTime)
@@ -138,13 +139,14 @@ async function enqueue(jobs, timeout) {
           }
           }  
       } catch (error) {
+        console.log(error)
         todo.push(j)
         await new Promise(resolve =>
           setTimeout(resolve, x.remainingTime)
         );
         enqueue(todo, timeout)
         break
-        console.log(error)
+        
       }
   }
 }
