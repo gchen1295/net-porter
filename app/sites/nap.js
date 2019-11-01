@@ -904,7 +904,7 @@ function startmonitor2() {
                 e.avatar_url = filtered[i].logo
                 e.embeds[0].footer.icon_url =  filtered[i].logo
                 e.embeds[0].color = parseInt(filtered[i].color)
-                e.embeds[0].footer.text = filtered[j].footer
+                e.embeds[0].footer.text = filtered[i].footer
                 jobs.push(request.post(filtered[i].webhook,{
                   headers: {
                     'Content-Type': 'application/json'
