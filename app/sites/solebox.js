@@ -57,7 +57,7 @@ let kwSets = []
 let proxies = []
 let filtered = []
 let unfiltered = []
-let px3Cookie
+let px3Cookie = []
 
 async function getProducts(proxy){
 try
