@@ -880,6 +880,7 @@ function startmonitor2() {
             let emb = buildNewProduct(cleanedProduct)
             for(let j = 0; j < unfiltered.length; ++j)
             {
+              console.log(newProduct.productName)
               let e = _.cloneDeep(emb)
               e.avatar_url = unfiltered[j].logo
               e.embeds[0].footer.icon_url = unfiltered[j].logo
