@@ -1,0 +1,310 @@
+
+{
+  "header": {
+    "event": "Allocation failed - JavaScript heap out of memory",
+    "trigger": "FatalError",
+    "filename": "report.20191015.232825.11104.0.001.json",
+    "dumpEventTime": "2019-10-15T23:28:25Z",
+    "dumpEventTimeStamp": "1571196505997",
+    "processId": 11104,
+    "cwd": "d:\\Desktop\\Monitors\\net-porter",
+    "commandLine": [
+      "node",
+      "d:\\Desktop\\Monitors\\net-porter\\app\\sites\\solebox.js"
+    ],
+    "nodejsVersion": "v12.4.0",
+    "wordSize": 64,
+    "arch": "x64",
+    "platform": "win32",
+    "componentVersions": {
+      "node": "12.4.0",
+      "v8": "7.4.288.27-node.18",
+      "uv": "1.29.1",
+      "zlib": "1.2.11",
+      "brotli": "1.0.7",
+      "ares": "1.15.0",
+      "modules": "72",
+      "nghttp2": "1.38.0",
+      "napi": "4",
+      "llhttp": "1.1.3",
+      "http_parser": "2.8.0",
+      "openssl": "1.1.1b",
+      "cldr": "35.1",
+      "icu": "64.2",
+      "tz": "2019a",
+      "unicode": "12.1"
+    },
+    "release": {
+      "name": "node",
+      "headersUrl": "https://nodejs.org/download/release/v12.4.0/node-v12.4.0-headers.tar.gz",
+      "sourceUrl": "https://nodejs.org/download/release/v12.4.0/node-v12.4.0.tar.gz",
+      "libUrl": "https://nodejs.org/download/release/v12.4.0/win-x64/node.lib"
+    },
+    "osName": "Windows_NT",
+    "osRelease": "10.0.18362",
+    "osVersion": "Windows 10 Pro",
+    "osMachine": "x86_64",
+    "host": "DESKTOP-GQKF1H8"
+  },
+  "javascriptStack": {
+    "message": "No stack.",
+    "stack": [
+      "Unavailable."
+    ]
+  },
+  "nativeStack": [
+    {
+      "pc": "0x00007ff755fb64a9",
+      "symbol": "std::basic_ostream<char,std::char_traits<char> >::operator<<+9161"
+    },
+    {
+      "pc": "0x00007ff755fb9d94",
+      "symbol": "std::basic_ostream<char,std::char_traits<char> >::operator<<+23732"
+    },
+    {
+      "pc": "0x00007ff755fb8db8",
+      "symbol": "std::basic_ostream<char,std::char_traits<char> >::operator<<+19672"
+    },
+    {
+      "pc": "0x00007ff7560a256b",
+      "symbol": "uv_loop_fork+48251"
+    },
+    {
+      "pc": "0x00007ff7563da56e",
+      "symbol": "v8::internal::Parser::ReportMessageAt+206"
+    },
+    {
+      "pc": "0x00007ff7563ae5ea",
+      "symbol": "v8::internal::wasm::StreamingDecoder::Fail+666"
+    },
+    {
+      "pc": "0x00007ff756444a3c",
+      "symbol": "v8::internal::Heap::CreateFillerObjectAt+2972"
+    },
+    {
+      "pc": "0x00007ff75644c7af",
+      "symbol": "v8::internal::LocalEmbedderHeapTracer::NotifyV8MarkingWorklistWasEmpty+5375"
+    },
+    {
+      "pc": "0x00007ff756442e23",
+      "symbol": "v8::internal::Heap::CollectGarbage+1235"
+    },
+    {
+      "pc": "0x00007ff756441524",
+      "symbol": "v8::internal::GCTracer::AddScopeSample+1316"
+    },
+    {
+      "pc": "0x00007ff756482153",
+      "symbol": "v8::internal::Factory::NewFillerObject+67"
+    },
+    {
+      "pc": "0x00007ff7567a8cc6",
+      "symbol": "v8::internal::OptimizingCompileDispatcher::Unblock+116966"
+    },
+    {
+      "pc": "0x00007ff756c44196",
+      "symbol": "v8::internal::NativesCollection<0>::GetScriptsSource+662454"
+    }
+  ],
+  "javascriptHeap": {
+    "totalMemory": 2162778112,
+    "totalCommittedMemory": 2162778112,
+    "usedMemory": 2149372296,
+    "availableMemory": 45829992,
+    "memoryLimit": 2197815296,
+    "heapSpaces": {
+      "read_only_space": {
+        "memorySize": 524288,
+        "committedMemory": 524288,
+        "capacity": 523976,
+        "used": 31712,
+        "available": 492264
+      },
+      "new_space": {
+        "memorySize": 10485760,
+        "committedMemory": 10485760,
+        "capacity": 5239760,
+        "used": 1073360,
+        "available": 4166400
+      },
+      "old_space": {
+        "memorySize": 1987174400,
+        "committedMemory": 1987174400,
+        "capacity": 1985884000,
+        "used": 1984989616,
+        "available": 894384
+      },
+      "code_space": {
+        "memorySize": 688128,
+        "committedMemory": 688128,
+        "capacity": 281760,
+        "used": 281760,
+        "available": 0
+      },
+      "map_space": {
+        "memorySize": 1576960,
+        "committedMemory": 1576960,
+        "capacity": 753520,
+        "used": 753520,
+        "available": 0
+      },
+      "large_object_space": {
+        "memorySize": 162279424,
+        "committedMemory": 162279424,
+        "capacity": 162238872,
+        "used": 162238872,
+        "available": 0
+      },
+      "code_large_object_space": {
+        "memorySize": 49152,
+        "committedMemory": 49152,
+        "capacity": 3456,
+        "used": 3456,
+        "available": 0
+      },
+      "new_large_object_space": {
+        "memorySize": 0,
+        "committedMemory": 0,
+        "capacity": 5239760,
+        "used": 0,
+        "available": 5239760
+      }
+    }
+  },
+  "resourceUsage": {
+    "userCpuSeconds": 70.609,
+    "kernelCpuSeconds": 2.031,
+    "cpuConsumptionPercent": 242.133,
+    "maxRss": 2326663168,
+    "pageFaults": {
+      "IORequired": 1010836,
+      "IONotRequired": 0
+    },
+    "fsActivity": {
+      "reads": 970,
+      "writes": 113
+    }
+  },
+  "libuv": [
+  ],
+  "environmentVariables": {
+    "=C:": "C:\\",
+    "=D:": "d:\\Desktop\\Monitors\\net-porter",
+    "ALLUSERSPROFILE": "C:\\ProgramData",
+    "AMD_ENTRYPOINT": "vs/workbench/services/extensions/node/extensionHostProcess",
+    "APPDATA": "C:\\Users\\Chen\\AppData\\Roaming",
+    "APPLICATION_INSIGHTS_NO_DIAGNOSTIC_CHANNEL": "true",
+    "asl.log=Destination": "file",
+    "BOT_TOKEN": "NTc4ODI5NTA1NTQ0ODQ3MzYx.XZWOrA.i4hhMf1o59Nns5dXzj48Bq0aPJw",
+    "CommonProgramFiles": "C:\\Program Files\\Common Files",
+    "CommonProgramFiles(x86)": "C:\\Program Files (x86)\\Common Files",
+    "CommonProgramW6432": "C:\\Program Files\\Common Files",
+    "COMPUTERNAME": "DESKTOP-GQKF1H8",
+    "ComSpec": "C:\\WINDOWS\\system32\\cmd.exe",
+    "DriverData": "C:\\Windows\\System32\\Drivers\\DriverData",
+    "ELECTRON_RUN_AS_NODE": "1",
+    "ERRORHOOK": "https://discordapp.com/api/webhooks/628787479696244777/K-2Ikl0no_1tEkQ48rRAPIe3kTtDQJx3qsfndnh7Gei5pqX6aXKuz05hZBR0jK84sBO9",
+    "FPS_BROWSER_APP_PROFILE_STRING": "Internet Explorer",
+    "FPS_BROWSER_USER_PROFILE_STRING": "Default",
+    "HOMEDRIVE": "C:",
+    "HOMEPATH": "\\Users\\Chen",
+    "LOCALAPPDATA": "C:\\Users\\Chen\\AppData\\Local",
+    "LOGONSERVER": "\\\\DESKTOP-GQKF1H8",
+    "MONGO_DB": "net-a-porter",
+    "MONGO_SERVER": "127.0.0.1:27017",
+    "NUMBER_OF_PROCESSORS": "8",
+    "NVM_HOME": "C:\\Users\\Chen\\AppData\\Roaming\\nvm",
+    "NVM_SYMLINK": "D:\\Program Files\\nodejs",
+    "OneDrive": "C:\\Users\\Chen\\OneDrive",
+    "OneDriveConsumer": "C:\\Users\\Chen\\OneDrive",
+    "OS": "Windows_NT",
+    "Path": "C:\\ProgramData\\DockerDesktop\\version-bin;C:\\Program Files\\Docker\\Docker\\Resources\\bin;D:\\Perl64\\site\\bin;D:\\Perl64\\bin;C:\\Program Files (x86)\\Common Files\\Oracle\\Java\\javapath;C:\\WINDOWS\\system32;C:\\WINDOWS;C:\\WINDOWS\\System32\\Wbem;C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\;C:\\WINDOWS\\System32\\OpenSSH\\;D:\\Program Files\\PuTTY\\;C:\\Program Files\\dotnet\\;C:\\Program Files\\Microsoft SQL Server\\130\\Tools\\Binn\\;D:\\Program Files\\Git\\cmd;C:\\MinGW\\bin;C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Python 2.7;D:\\Program Files\\CMake\\bin;C:\\Program Files\\CMake\\bin;C:\\Users\\Chen\\AppData\\Roaming\\nvm;D:\\Program Files\\nodejs;D:\\Program Files\\nodejs\\;C:\\Users\\Chen\\AppData\\Local\\Programs\\Python\\Python37;C:\\Users\\Chen\\.windows-build-tools\\python27;C:\\Users\\Chen\\AppData\\Local\\Programs\\Python\\Python37\\python.exe;D:\\Program Files (x86)\\Yarn\\bin\\;C:\\Users\\Chen\\AppData\\Local\\Programs\\Python\\Python37\\Scripts\\;C:\\Users\\Chen\\AppData\\Local\\Programs\\Python\\Python37\\;C:\\Users\\Chen\\.windows-build-tools\\python27\\;node_modules\\npm\\node_modules\\npm-lifecycle\\node-gyp-bin;C:\\Users\\Chen\\AppData\\Roaming\\npm\\node_modules\\windows-build-tools\\node_modules\\.bin;C:\\Users\\Chen\\AppData\\Roaming\\npm\\node_modules\\.bin;C:\\Program Files (x86)\\Common Files\\Oracle\\Java\\javapath;C:\\ProgramData\\DockerDesktop\\version-bin;C:\\Program Files\\Docker\\Docker\\Resources\\bin;C:\\WINDOWS\\system32;C:\\WINDOWS;C:\\WINDOWS\\System32\\Wbem;C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\;C:\\WINDOWS\\System32\\OpenSSH\\;D:\\Program Files\\PuTTY\\;C:\\Program Files\\dotnet\\;C:\\Program Files\\Microsoft SQL Server\\130\\Tools\\Binn\\;D:\\Program Files\\Git\\cmd;C:\\MinGW\\bin;C:\\Users\\Chen\\AppData\\Local\\Microsoft\\WindowsApps;C:\\Users\\Chen\\AppData\\Local\\Programs\\Microsoft VS Code\\bin;C:\\Users\\Chen\\AppData\\Roaming\\nvm;D:\\Program Files\\nodejs;C:\\Users\\Chen\\AppData\\Roaming\\npm;C:\\Users\\Chen\\AppData\\Local\\Programs\\Python\\Python37;C:\\Users\\Chen\\AppData\\Local\\Programs\\Python\\Python37\\python.exe;D:\\Program Files (x86)\\Yarn\\bin;;C:\\Users\\Chen\\AppData\\Local\\Microsoft\\WindowsApps;C:\\Users\\Chen\\AppData\\Local\\Programs\\Fiddler",
+    "PATHEXT": ".COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH;.MSC",
+    "PIPE_LOGGING": "true",
+    "PROCESSOR_ARCHITECTURE": "AMD64",
+    "PROCESSOR_IDENTIFIER": "AMD64 Family 23 Model 17 Stepping 0, AuthenticAMD",
+    "PROCESSOR_LEVEL": "23",
+    "PROCESSOR_REVISION": "1100",
+    "ProgramData": "C:\\ProgramData",
+    "ProgramFiles": "C:\\Program Files",
+    "ProgramFiles(x86)": "C:\\Program Files (x86)",
+    "ProgramW6432": "C:\\Program Files",
+    "PROMPT": "$P$G",
+    "PROXIES": "154.12.31.23:65037 154.12.31.24:65037 154.12.31.25:65037 154.12.31.26:65037 154.12.31.27:65037 154.12.31.28:65037 154.12.31.29:65037 154.12.31.30:65037 154.12.31.31:65037 154.12.31.32:65037 154.12.31.33:65037",
+    "PSModulePath": "C:\\Program Files\\WindowsPowerShell\\Modules;C:\\WINDOWS\\system32\\WindowsPowerShell\\v1.0\\Modules",
+    "PUBLIC": "C:\\Users\\Public",
+    "PYTHON": "C:\\Users\\Chen\\AppData\\Local\\Programs\\Python\\Python37\\python.exe",
+    "SESSIONNAME": "Console",
+    "SystemDrive": "C:",
+    "SystemRoot": "C:\\WINDOWS",
+    "TEMP": "C:\\Users\\Chen\\AppData\\Local\\Temp",
+    "TMP": "C:\\Users\\Chen\\AppData\\Local\\Temp",
+    "USERDOMAIN": "DESKTOP-GQKF1H8",
+    "USERDOMAIN_ROAMINGPROFILE": "DESKTOP-GQKF1H8",
+    "USERNAME": "Chen",
+    "USERPROFILE": "C:\\Users\\Chen",
+    "VCPKG_DEFAULT_TRIPLET": "x64-windows",
+    "VERBOSE_LOGGING": "true",
+    "VS140COMNTOOLS": "C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\Common7\\Tools\\",
+    "VSCODE_CWD": "C:\\Users\\Chen\\AppData\\Local\\Programs\\Microsoft VS Code",
+    "VSCODE_HANDLES_UNCAUGHT_ERRORS": "true",
+    "VSCODE_IPC_HOOK": "\\\\.\\pipe\\708a2f0e187605b4dd13d3d6ea9865cd-1.39.1-main-sock",
+    "VSCODE_IPC_HOOK_EXTHOST": "\\\\.\\pipe\\vscode-ipc-6a4b93ef-594b-4289-92d1-a27f5f61b48b-sock",
+    "VSCODE_LOGS": "C:\\Users\\Chen\\AppData\\Roaming\\Code\\logs\\20191012T162728",
+    "VSCODE_LOG_STACK": "false",
+    "VSCODE_NLS_CONFIG": "{\"locale\":\"en-us\",\"availableLanguages\":{},\"_languagePackSupport\":true}",
+    "VSCODE_NODE_CACHED_DATA_DIR": "C:\\Users\\Chen\\AppData\\Roaming\\Code\\CachedData\\88f15d17dca836346e787762685a40bb5cce75a8",
+    "VSCODE_PID": "20132",
+    "WEBHOOK": "https://discordapp.com/api/webhooks/628764194174402560/-gjl85A35iTAF9U3CB9IWAAMEE8qhRC6Wl6yKjmH5iltLZYvkIAHvr7ycsASlY2Iuui0",
+    "windir": "C:\\WINDOWS"
+  },
+  "sharedObjects": [
+    "D:\\Program Files\\nodejs\\node.exe",
+    "C:\\WINDOWS\\SYSTEM32\\ntdll.dll",
+    "D:\\Program Files\\AVAST Software\\Avast\\aswhook.dll",
+    "C:\\WINDOWS\\System32\\KERNEL32.DLL",
+    "C:\\WINDOWS\\System32\\KERNELBASE.dll",
+    "C:\\WINDOWS\\System32\\WS2_32.dll",
+    "C:\\WINDOWS\\System32\\RPCRT4.dll",
+    "C:\\WINDOWS\\System32\\ADVAPI32.dll",
+    "C:\\WINDOWS\\System32\\msvcrt.dll",
+    "C:\\WINDOWS\\System32\\sechost.dll",
+    "C:\\WINDOWS\\System32\\USER32.dll",
+    "C:\\WINDOWS\\System32\\win32u.dll",
+    "C:\\WINDOWS\\System32\\GDI32.dll",
+    "C:\\WINDOWS\\System32\\gdi32full.dll",
+    "C:\\WINDOWS\\System32\\msvcp_win.dll",
+    "C:\\WINDOWS\\System32\\ucrtbase.dll",
+    "C:\\WINDOWS\\System32\\PSAPI.DLL",
+    "C:\\WINDOWS\\System32\\CRYPT32.dll",
+    "C:\\WINDOWS\\System32\\MSASN1.dll",
+    "C:\\WINDOWS\\System32\\bcrypt.dll",
+    "C:\\WINDOWS\\SYSTEM32\\dbghelp.dll",
+    "C:\\WINDOWS\\SYSTEM32\\IPHLPAPI.DLL",
+    "C:\\WINDOWS\\SYSTEM32\\USERENV.dll",
+    "C:\\WINDOWS\\System32\\profapi.dll",
+    "C:\\WINDOWS\\SYSTEM32\\WINMM.dll",
+    "C:\\WINDOWS\\SYSTEM32\\WINMMBASE.dll",
+    "C:\\WINDOWS\\System32\\cfgmgr32.dll",
+    "C:\\WINDOWS\\System32\\bcryptPrimitives.dll",
+    "C:\\WINDOWS\\System32\\IMM32.DLL",
+    "C:\\WINDOWS\\System32\\powrprof.dll",
+    "C:\\WINDOWS\\System32\\UMPDC.dll",
+    "C:\\WINDOWS\\system32\\uxtheme.dll",
+    "C:\\WINDOWS\\System32\\combase.dll",
+    "C:\\WINDOWS\\system32\\mswsock.dll",
+    "C:\\WINDOWS\\System32\\kernel.appcore.dll",
+    "C:\\WINDOWS\\SYSTEM32\\CRYPTBASE.DLL",
+    "C:\\WINDOWS\\System32\\NSI.dll",
+    "C:\\WINDOWS\\SYSTEM32\\dhcpcsvc6.DLL",
+    "C:\\WINDOWS\\SYSTEM32\\dhcpcsvc.DLL",
+    "C:\\WINDOWS\\SYSTEM32\\DNSAPI.dll",
+    "C:\\Windows\\System32\\rasadhlp.dll",
+    "C:\\WINDOWS\\System32\\fwpuclnt.dll",
+    "C:\\WINDOWS\\system32\\napinsp.dll",
+    "C:\\WINDOWS\\system32\\pnrpnsp.dll",
+    "C:\\WINDOWS\\System32\\winrnr.dll",
+    "C:\\WINDOWS\\system32\\NLAapi.dll",
+    "C:\\WINDOWS\\system32\\wshbth.dll"
+  ]
+}

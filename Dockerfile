@@ -9,3 +9,7 @@ COPY ./app /home/root/app
 
 # Start me!
 CMD ["npm", "start"]
+
+CMD ["node", "nap.js"]
+
+CMD ["node", "nap-us.js"]

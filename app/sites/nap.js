@@ -550,13 +550,19 @@ function buildRestocked(product)
       if(limit < 900)
       {
         limit += f.length
+        if(product.productSizes[i].stockLevel !== "Out_of_Stock")
+        {
         sizeFields.push(f)
         stockFields.push(product.productSizes[i].stockLevel)
+        }
       }
       else
       {
+        if(product.productSizes[i].stockLevel !== "Out_of_Stock")
+        {
         sizeFields2.push(f)
         stockFields2.push(product.productSizes[i].stockLevel)
+        }
       }
     }
 
@@ -649,6 +655,51 @@ async function getAllProductsAPI(proxy)
   }
 }
 
+async function getAllProductsEPI(proxy)
+{
+  try
+  {
+    let proxyParts = proxy.split(':')
+    let agent 
+    if(proxyParts[2] && proxyParts[3])
+    {
+      agent = "http://" + proxyParts[2] + ':' + proxyParts[3] + '@' + proxyParts[0] + ':' + proxyParts[1]
+    }
+    else
+    {
+      agent = "http://" + proxyParts[0] + ':' + proxyParts[1]
+    }
+    
+    
+    let res = await request({
+      url: 'https://api.net-a-porter.com/NAP/GB/en/1600/0/summaries?visibility=eip-visible&brandIds=1051,1212,1840,2606',
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.90 Safari/537.36'
+      },
+      proxy: agent,
+      resolveWithFullResponse: true,
+      followAllRedirects: true
+    })
+    let products = JSON.parse(res.body).summaries
+    
+    return products  
+  }
+  catch(err)
+  {
+    console.log(err)
+    if(err.statusCode)
+    {
+      let e = buildError(`GetProducts GB: ${err.statusCode}`)
+      await sendErrorWebhook(e)
+    }
+    else
+    {
+      let e = buildError(`GetProducts GB: ${err}`)
+      await sendErrorWebhook(e)
+    }
+  }
+}
+
 function startmonitor2() {
   setTimeout(async function () {
     try{
@@ -663,6 +714,8 @@ function startmonitor2() {
       proxies.push(proxy)
       console.log(proxy)
       let rawProducts = await getAllProductsAPI(proxy)
+      let rawProductsEPI = await getAllProductsEPI(proxy)
+      rawProducts = rawProducts.concat(rawProductsEPI)
       let matchedProducts = []
       //let cleaned = await cleanProduct(p[i], '')
 
