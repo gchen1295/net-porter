@@ -836,7 +836,7 @@ function startmonitor2() {
                   let e = _.cloneDeep(emb)
                   e.avatar_url = filtered[i].logo
                   e.embeds[0].footer.icon_url = filtered[i].logo
-                  e.embeds[0].footer.text = filtered[j].footer
+                  e.embeds[0].footer.text = filtered[i].footer
                   e.embeds[0].color = parseInt(filtered[i].color)
                   jobs.push(request.post(filtered[i].napWebhookUS,{
                     headers: {
