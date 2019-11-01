@@ -131,7 +131,9 @@ async function enqueue(jobs, timeout) {
               // );
           } catch (error) {
               console.log(error)
-              todo.push(j)
+              if (j instanceof Function) {
+                todo.push(j)
+              }
               await new Promise(resolve =>
                 setTimeout(resolve, x.remainingTime)
               );
@@ -140,7 +142,9 @@ async function enqueue(jobs, timeout) {
           }  
       } catch (error) {
         console.log(error)
-        todo.push(j)
+        if (j instanceof Function) {
+          todo.push(j)
+        }
         await new Promise(resolve =>
           setTimeout(resolve, x.remainingTime)
         );
