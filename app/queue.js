@@ -144,7 +144,7 @@ async function enqueue(jobs, timeout) {
         );
         enqueue(todo, timeout)
         break
-        //console.log(error)
+        console.log(error)
       }
   }
 }
