@@ -66,6 +66,7 @@ try
   let agent
   let pxCookie = px3Cookie[0]
   console.log(pxCookie)
+  console.log(proxy)
   if(pxCookie === undefined) return
   if(proxyParts[2] && proxyParts[3])
   {
