@@ -101,7 +101,7 @@ catch(err)
   let config = await Config.findOne()
   config.px3Cookie = px3Cookie
   await config.save()
-  console.log(err.statusCode)
+  console.log(err)
   if(err.statusCode)
   {
     let e = buildError(`GetProducts Solebox: ${err.statusCode}\n${productURL}`)
