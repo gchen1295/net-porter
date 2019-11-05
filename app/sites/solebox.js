@@ -99,7 +99,7 @@ catch(err)
 {
   px3Cookie.shift()
   let config = await Config.findOne()
-  config.px3Cookie = px3Cookie()
+  config.px3Cookie = px3Cookie
   await config.save()
   console.log(err.statusCode)
   if(err.statusCode)
@@ -154,7 +154,7 @@ async function getProductSizes(productLink, proxy){
   {
     px3Cookie.shift()
     let config = await Config.findOne()
-    config.px3Cookie = px3Cookie()
+    config.px3Cookie = px3Cookie
     await config.save()
     if(err.statusCode)
     {
