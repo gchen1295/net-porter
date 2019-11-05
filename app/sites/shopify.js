@@ -18,7 +18,7 @@ let limit = 249
 
 const CLOTHINGWH = 'https://discordapp.com/api/webhooks/638929103482781696/Ts_t_2lThFyjOYeDG0qaWkxF99PUa7LCIIRNAT41CudBfNg5MWHXIs1PYiUiPo-IPCeD'
 const SNEAKERWH = 'https://discordapp.com/api/webhooks/639855061001830456/VCVMsBcIJTKwTqzchV_8HFPEOUK7I_tPVv60nDOnzaWvQDZ9sFb-tkLpOWe7i2Hhvl8j'
-sendForm(SNEAKERWH)
+//sendForm(SNEAKERWH)
 async function sendForm(wh)
 {
   try
@@ -32,9 +32,9 @@ async function sendForm(wh)
         avatar_url: "https://cdn.discordapp.com/avatars/638929103482781696/0f8d97a7eafcbe6479930a9fe75a751e.png",
         embeds: [
           {
-            title: `FEAR OF GOD "OATMEAL"`,
-            url: 'https://forms.gle/Tt3LscbSrJTBVnK76',
-            description: 'FEAR OF GOD "OATMEAL"\n$40 PAS',
+            title: `AJ1 FEARLESS`,
+            url: 'https://forms.gle/FMKAfgPivYoJx1xA6',
+            description: 'Jordan 1 Fearless\n$40 PAS',
             color: 0xFF0000,
             footer: {
               icon_url:
@@ -42,7 +42,7 @@ async function sendForm(wh)
               text: "Powered by PremeProfits"
             },
             image: {
-              url: 'https://sneakernews.com/wp-content/uploads/2019/10/nike-air-fear-of-god-1-AR4237-900-1.jpg'
+              url: 'https://cdn.thesolesupplier.co.uk/2019/10/fearless.jpg'
             }
           }
         ]
@@ -52,6 +52,55 @@ async function sendForm(wh)
   catch(err)
   {
 
+  }
+}
+sendDrop('https://discordapp.com/api/webhooks/640085409631830017/6mo6KGYzZnQEQouUlgenoDg93Pyumu7L09pjkAFipdtjQrpgFnVQoDFNzjuvgu8FmLPi')
+async function sendDrop(wh)
+{
+  try
+  {
+    await request.post(wh ,{
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        username: "CommunityDC Drops",
+        avatar_url: 'https://cdn.discordapp.com/icons/609881720082399232/a_fdc572b00baa4b8bbfed98997377ca15.png',
+        "embeds": [{
+          "title": "Yeezy 500 Soft Vision",
+          "url": "https://stockx.com/adidas-yeezy-500-soft-vision",
+          "color": 16753920,
+          "image": {
+            "url": "https://sneakernews.com/wp-content/uploads/2019/10/adidas-yeezy-500-soft-vision-FW2656-8.jpg"
+          },
+          "fields": [
+            {
+              "name": "Release Date",
+              "value": "11-2",
+              "inline": true
+            },
+            {
+              "name": "Retail",
+              "value": "$200",
+              "inline": true
+            },
+            {
+              "name": "Where",
+              "value": "[🧾 Courtesy of kriffic](https://docs.google.com/spreadsheets/d/12iA_Qdourb_bo95G-JJ611Xv7-W5PQmfI6OsTUhXJk0/edit?usp=sharing)"
+            },
+            {
+              "name": "Prediction",
+              "value": "The new colorway of the 500s. Current resale prices are low but will go up over time. Current stock is rumoured to be less than 40k pairs so these are expected to be a hard cop. Expect prices to rise as with most previous 500's. Recommended sizes are 8 and below with bae sizes always being the best for Yeezys.\n**Expected Resale:~$220-280+**",
+              "inline": true
+            }
+          ]
+        }]
+    })
+    });
+  }
+  catch(err)
+  {
+    console.log(err)
   }
 }
 

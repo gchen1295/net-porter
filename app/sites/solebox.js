@@ -65,8 +65,6 @@ try
   let proxyParts = proxy.split(':')
   let agent
   let pxCookie = px3Cookie[0]
-  console.log(pxCookie)
-  console.log(proxy)
   if(pxCookie === undefined) return
   if(proxyParts[2] && proxyParts[3])
   {
@@ -100,6 +98,9 @@ try
 catch(err)
 {
   px3Cookie.shift()
+  let config = await Config.findOne()
+  config.px3Cookie = px3Cookie()
+  await config.save()
   console.log(err.statusCode)
   if(err.statusCode)
   {
@@ -152,6 +153,9 @@ async function getProductSizes(productLink, proxy){
   catch(err)
   {
     px3Cookie.shift()
+    let config = await Config.findOne()
+    config.px3Cookie = px3Cookie()
+    await config.save()
     if(err.statusCode)
     {
       let e = buildError(`GetSize Solebox: ${err.statusCode}\n${productURL}`)
@@ -355,12 +359,13 @@ function startmonitor() {
       if(px3Cookie.length === 0)
       {
         console.log("No PX3 Cookie!")
+        startmonitor()
         return
       }
       if(proxies.length === 0)
       {
         console.log("Waiting on proxies")
-        startmonitor2()
+        startmonitor()
         return
       }
       let proxy = proxies.shift()
