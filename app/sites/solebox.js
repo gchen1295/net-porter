@@ -356,6 +356,7 @@ function buildRestocked(product)
 function startmonitor() {
   setTimeout(async function () {
     try{
+      console.log(px3Cookie)
       if(px3Cookie.length === 0)
       {
         console.log("No PX3 Cookie!")
