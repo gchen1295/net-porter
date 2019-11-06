@@ -6,6 +6,10 @@ const cheerio = require('cheerio')
 const Products = require('../models/soleProduct')
 const Config = require('../models/config')
 const housecall = require("housecall");
+const puppeteer = require("puppeteer-extra");
+// add stealth plugin and use defaults (all evasion techniques)
+const pluginStealth = require("puppeteer-extra-plugin-stealth")
+puppeteer.use(pluginStealth())
 let _ = require('lodash');
 let que = require('../queue.js')
 let date = new Date()
