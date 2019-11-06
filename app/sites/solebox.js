@@ -101,6 +101,7 @@ try
 }
 catch(err)
 {
+  console.log(err)
   px3Cookie = await soleboxGenerator(proxy)
   await getProducts(proxy)
   if(err.statusCode)
