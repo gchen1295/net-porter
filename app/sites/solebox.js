@@ -154,6 +154,7 @@ async function getProductSizes(productLink, proxy){
   }
   catch(err)
   {
+    console.log(err)
     px3Cookie = await soleboxGenerator(proxy)
     await getProductSizes(productLink, proxy)
     if(err.statusCode)
@@ -537,6 +538,7 @@ function startmonitor(initialProxy) {
     }
     catch(err)
     {
+      console.log(err)
       if(err.statusCode)
       {
         let e = buildError(`Main process: ${err.statusCode}`)
