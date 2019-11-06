@@ -68,7 +68,7 @@ try
 {
   let proxyParts = proxy.split(':')
   let agent
-  let pxCookie = px3Cookie[0]
+  let pxCookie = px3Cookie
   if(pxCookie === undefined) return
   if(proxyParts[2] && proxyParts[3])
   {
@@ -122,7 +122,7 @@ async function getProductSizes(productLink, proxy){
   {
     let proxyParts = proxy.split(':')
     let agent 
-    let pxCookie = px3Cookie[0]
+    let pxCookie = px3Cookie
     if(pxCookie === undefined) return
     if(proxyParts[2] && proxyParts[3])
     {
