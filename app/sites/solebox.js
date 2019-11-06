@@ -123,6 +123,7 @@ async function getProductSizes(productLink, proxy){
     let proxyParts = proxy.split(':')
     let agent 
     let pxCookie = px3Cookie
+    console.log(pxCookie)
     if(pxCookie === undefined) return
     if(proxyParts[2] && proxyParts[3])
     {
