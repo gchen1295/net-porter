@@ -616,9 +616,9 @@ async function soleboxGenerator(proxy)
         // }
       }
     }
-    page.close()
-    browser.close()
-    return c
+    await page.close()
+    await browser.close()
+    return c.value
   }catch(err)
   {
     console.log(err)
