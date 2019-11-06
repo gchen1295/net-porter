@@ -33,7 +33,7 @@ mongoose.connect(`mongodb://${mongoserver}/${db}`, {
     proxies = config.proxies
     filtered = config.filtered
     unfiltered = config.unfiltered
-    px3Cookie = config.px3Cookie
+    //px3Cookie = config.px3Cookie
     startmonitor()
   }
   Config.watch().on('change', async d=>{
@@ -46,7 +46,7 @@ mongoose.connect(`mongodb://${mongoserver}/${db}`, {
         proxies = config.proxies
         filtered = config.filtered
         unfiltered = config.unfiltered
-        px3Cookie = config.px3Cookie
+        //px3Cookie = config.px3Cookie
       }
     }
   })
@@ -57,7 +57,7 @@ let kwSets = []
 let proxies = []
 let filtered = []
 let unfiltered = []
-let px3Cookie = []
+let px3Cookie
 
 async function getProducts(proxy){
 try
@@ -97,11 +97,8 @@ try
 }
 catch(err)
 {
-  px3Cookie.shift()
-  let config = await Config.findOne()
-  config.px3Cookie = px3Cookie
-  await config.save()
-  console.log(err)
+  px3Cookie = await soleboxGenerator(proxy)
+  await getProducts(proxy)
   if(err.statusCode)
   {
     let e = buildError(`GetProducts Solebox: ${err.statusCode}\n${productURL}`)
@@ -152,10 +149,8 @@ async function getProductSizes(productLink, proxy){
   }
   catch(err)
   {
-    px3Cookie.shift()
-    let config = await Config.findOne()
-    config.px3Cookie = px3Cookie
-    await config.save()
+    px3Cookie = await soleboxGenerator(proxy)
+    await getProductSizes(productLink, proxy)
     if(err.statusCode)
     {
       let e = buildError(`GetSize Solebox: ${err.statusCode}\n${productURL}`)
@@ -353,27 +348,28 @@ function buildRestocked(product)
   }
 }
 
-function startmonitor() {
+function startmonitor(initialProxy) {
   setTimeout(async function () {
     try{
-      console.log(px3Cookie)
-      if(px3Cookie.length === 0)
-      {
-        console.log("No PX3 Cookie!")
-        startmonitor()
-        return
-      }
+      // if(px3Cookie.length === 0)
+      // {
+      //   console.log("No PX3 Cookie!")
+      //   startmonitor()
+      //   return
+      // }
+      
       if(proxies.length === 0)
       {
         console.log("Waiting on proxies")
         startmonitor()
         return
       }
-      let proxy = proxies.shift()
       let currPlist = proxies
-      proxies.push(proxy)
+      let proxy = currPlist.shift()
+      currPlist.push(proxy)
       console.log(proxy)
       // Find new products
+      px3Cookie = await soleboxGenerator(proxy)
       let bareProducts = await getProducts(proxy)
       // If new product find sizes and push notification
         // Go through database and check if its in database
@@ -548,4 +544,80 @@ function startmonitor() {
       startmonitor()
     }
   }, 1500 )
+}
+
+async function soleboxGenerator(proxy)
+{
+  try{
+    let validCookie = false
+    let p = proxy.split(":");
+    const browser = await puppeteer.launch({
+      headless: true,
+      defaultViewport: null,
+      ignoreDefaultArgs: ["--enable-automation"],
+      //executablePath: chromePaths.chrome,
+      args: [
+        `--proxy-server=${p[0]}:${p[1]}`,
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-infobars',
+        '--window-position=0,0',
+        '--ignore-certificate-errors',
+        '--ignore-certificate-errors-spki-list',
+        '--lang=en-US,en;q=0.9',
+        `--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.70 Safari/537.36`,
+      ],
+      headless: true
+    });
+    let pages = await browser.pages()
+    let page = pages[0]
+    let username = p[2];
+    let password = p[3];
+    await page[0].authenticate({ username, password });
+    let r1 = await page.goto('https://www.solebox.com/en/New/')
+    await page.mouse.move(256, 500)
+    await new Promise(resolve =>
+      setTimeout(resolve, 250)
+    );
+    await page.mouse.move(10, 152)
+    await page.mouse.down()
+    await page.mouse.up()
+    await page.mouse.down()
+    await page.mouse.up()
+    await page.mouse.move(136, 523)
+    cookies = await page.cookies('https://www.solebox.com/')
+    let c
+    for(let i in cookies)
+    {
+      //console.log(cookies[i].name)
+      if(cookies[i].name === '_pxvid')
+      {
+        c = {
+          name: cookies[i].name,
+          value: cookies[i].value
+        }
+        // console.log(c)
+        // let conf = await Config.findOne({})
+        // if(conf)
+        // {
+        //   if(conf.px3Cookie)
+        //   {
+        //     conf.px3Cookie.push(cookies[i].value)
+        //   }
+        //   else
+        //   {
+        //     conf.px3Cookie= [cookies[i].value]
+        //   }
+        //   await conf.save()
+        // }
+      }
+    }
+    page.close()
+    browser.close()
+    return c
+  }catch(err)
+  {
+    console.log(err)
+    console.log(jar)
+  }
 }
