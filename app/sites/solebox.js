@@ -374,6 +374,7 @@ function startmonitor(initialProxy) {
       console.log(proxy)
       // Find new products
       px3Cookie = await soleboxGenerator(proxy)
+      console.log(px3Cookie)
       let bareProducts = await getProducts(proxy)
       // If new product find sizes and push notification
         // Go through database and check if its in database
