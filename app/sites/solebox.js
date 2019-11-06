@@ -577,7 +577,7 @@ async function soleboxGenerator(proxy)
     let page = pages[0]
     let username = p[2];
     let password = p[3];
-    await page[0].authenticate({ username, password });
+    await page.authenticate({ username, password });
     let r1 = await page.goto('https://www.solebox.com/en/New/')
     await page.mouse.move(256, 500)
     await new Promise(resolve =>
